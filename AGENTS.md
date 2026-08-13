@@ -138,6 +138,13 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 7. North usa `econative_plan_read` cuando necesita leer el plan completo y `econative_plan_archive` al cerrar un plan completo. Son helpers legítimos del mismo ciclo del plan, no sistemas alternativos ni duplicados: `econative_plan` sigue siendo la única tool de mutación/gestión operativa; `econative_plan_read` y `econative_plan_archive` completan el ciclo.
 8. North devuelve el resultado a Refiner, Refiner lo sintetiza al usuario
 
+### Continuidad Refiner ↔ North
+
+- **Refiner** debe entregar a North una acción técnica completa y cerrada.
+- **North** no pregunta al usuario ni escala dudas rutinarias: solo lo hace ante un bloqueo concreto. Mantiene el plan y la tarea en `in_progress` mientras consulta a Refiner.
+- **Refiner** resuelve la consulta o usa `question()` como último recurso; después retoma con North usando el mismo `task_id`.
+- **North** continúa la sesión y la tarea originales, y solo las cierra al terminar.
+
 ### Lectura post-compactación
 
 - Refiner puede leer el plan después de compactación si la conversación quedó en Refiner.
