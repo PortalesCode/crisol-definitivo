@@ -356,6 +356,10 @@ merge_engram_agents() {
   # Merge sano del protocolo engram en el AGENTS.md global de OpenCode.
   # Nunca pisa el AGENTS.md del usuario: si ya tiene el bloque (marcador),
   # no hace nada (idempotente); si no, hace append del bloque al final.
+  if ! command -v engram >/dev/null 2>&1; then
+    warn "Protocolo engram omitido porque Engram no está instalado."
+    return 0
+  fi
   local pkg_agents="$SCRIPT_DIR/Agents-engram-memory/AGENTS.md"
   local global_dir="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
   local global_agents="$global_dir/AGENTS.md"
@@ -676,15 +680,17 @@ main() {
   info "Paso 6/6 — engram (memoria persistente global, opcional, NO bloqueante)"
   if [ "$INSTALL_ENGRAM" = "no" ]; then
     info "Salteado (INSTALL_ENGRAM=no)."
+    warn "Protocolo engram omitido porque la instalación de Engram fue desactivada."
   elif [ "$INSTALL_ENGRAM" = "yes" ]; then
     if $DRY_RUN; then
       dry "Instalaría engram si no está en PATH, mergearía su protocolo en ~/.config/opencode/AGENTS.md y agregaría el MCP al opencode.json local si no está en tu config global"
     else
-      install_engram || warn "engram no quedó instalado; el ecosistema funciona igual (sin memoria persistente)."
-      merge_engram_agents || warn "no se pudo mergear el protocolo engram en el AGENTS.md global; el resto continúa"
-      # El MCP local solo tiene sentido si el binario quedó disponible (guard)
-      if command -v engram >/dev/null 2>&1; then
+      if install_engram; then
+        merge_engram_agents || warn "no se pudo mergear el protocolo engram en el AGENTS.md global; el resto continúa"
         setup_engram_mcp "$TARGET" || warn "el MCP engram no se agregó al opencode.json local; el resto de la instalación continúa"
+      else
+        warn "engram no quedó instalado; el ecosistema funciona igual (sin memoria persistente)."
+        warn "Protocolo engram omitido porque Engram no está instalado."
       fi
     fi
   else
@@ -699,21 +705,20 @@ main() {
       read -r ans || true
       case "${ans:-N}" in
         s|S|y|Y|si|SI|yes|YES)
-          install_engram || warn "engram no quedó instalado; el ecosistema funciona igual (sin memoria persistente)."
-          # Solo se agrega el MCP si el binario quedó disponible (guard)
-          if command -v engram >/dev/null 2>&1; then
+          if install_engram; then
+            merge_engram_agents || warn "no se pudo mergear el protocolo engram en el AGENTS.md global; el resto continúa"
             setup_engram_mcp "$TARGET" || warn "el MCP engram no se agregó al opencode.json local; el resto de la instalación continúa"
+          else
+            warn "engram no quedó instalado; el ecosistema funciona igual (sin memoria persistente)."
+            warn "Protocolo engram omitido porque Engram no está instalado."
           fi
           ;;
         *)
           warn "No se instaló engram. El ecosistema funciona igual; sin memoria persistente entre sesiones."
+          warn "Protocolo engram omitido porque Engram no está instalado."
           warn "Para hacerlo más tarde:  brew install gentleman-programming/tap/engram   (o)   go install github.com/Gentleman-Programming/engram/cmd/engram@latest"
           ;;
       esac
-      # El merge del AGENTS.md se hace igual aunque no se instale engram:
-      # el protocolo es inofensivo sin el binario y queda listo si lo instala después.
-      # El MCP local NO se agrega si el usuario rechazó instalar engram.
-      merge_engram_agents || warn "no se pudo mergear el protocolo engram en el AGENTS.md global; el resto continúa"
     fi
   fi
 

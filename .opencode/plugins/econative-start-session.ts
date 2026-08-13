@@ -10,9 +10,10 @@ export default (async () => {
       econative_start_session: tool({
         description:
           "INICIO OBLIGATORIO DE SESIÓN. Refiner DEBE llamar esta tool al comenzar cada conversación. "
-          + "Lee contexto, plan activo y preferencias del ecosistema. "
+          + "Lee contexto, plan activo y preferencias del ecosistema, y devuelve esos datos junto con el estado de onboarding. "
           + "Si no hay preferencias de usuario, devuelve onboarding_required: true. "
           + "Crea workspec/plans/active/plan.md si no existe. "
+          + "Para leer otro estado del proyecto, usá la tool correspondiente. "
           + "La instalación del ecosistema se hace con install.sh, no con esta tool.",
         args: {},
         async execute(_args, context) {

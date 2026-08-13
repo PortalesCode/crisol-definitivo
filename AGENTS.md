@@ -1,8 +1,8 @@
 # Crisol Definitive — Ecosystem
 
 > Ecosistema de desarrollo autónomo para OpenCode.
-> **Refiner** entiende la intención del usuario, la clarifica y crea el plan.
-> **North** es el cerebro: serializa el plan y delega a sus manos.
+> **Refiner** entiende y refina la intención del usuario, y formula la acción.
+> **North** es el cerebro: crea y descompone el plan, y delega a sus manos.
 > **Boehmio** abre la cabeza, **Realistic** baja a tierra, **Executor** ejecuta, **Auditor** verifica.
 > **Portable por proyecto**: se instala con `install.sh`.
 > Publicable, clonable, mantenible.
@@ -92,8 +92,8 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 
 | Agente | Modo | Rol |
 |---|---|---|
-| `Refiner` | primary | Puerta de entrada. Entiende, refina, clarifica la intención del user, coordina el análisis y crea el plan. Es la voz de North. |
-| `North` | subagent | El cerebro. Recibe la intención pulida de Refiner, la serializa en plan y delega. |
+| `Refiner` | primary | Puerta de entrada. Entiende, refina y clarifica la intención del user, coordina el análisis y formula la acción. Es la voz de North. |
+| `North` | subagent | El cerebro. Recibe la acción formulada por Refiner, crea y descompone el plan, y delega. |
 | `Boehmio` | subagent | Creativo. Analiza ideas, abre la cabeza. Lo consulta Refiner. |
 | `Realistic` | subagent | Realista. Baja a tierra, valida, puntúa 1-10. Lo consulta Refiner. |
 | `Executor` | subagent | La mano de North. Ejecuta. |
@@ -102,8 +102,8 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 ### Filosofía
 
 ```
-Refiner = entender, clarificar la intención y crear el plan
-North = el cerebro (serializa el plan y delega)
+Refiner = entender, refinar la intención y formular la acción
+North = el cerebro (crea, descompone y administra el plan; delega)
 Boehmio / Realistic = análisis previo del triángulo
 Executor = operación
 Auditor = control
@@ -129,13 +129,21 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 
 ## Flujo de trabajo (nueva arquitectura)
 
-1. **Refiner** recibe la intención del usuario
+1. **Refiner** recibe la intención del usuario, la entiende, la refina y formula la acción
 2. Si la idea es grande/abierta → consulta el triángulo (**Boehmio** + **Realistic**)
 3. Refiner presenta al usuario la opinión de ambos resumida; Realistic da el veredicto técnico (1-10); **Refiner da el veredicto final**
 4. **El usuario decide** pasar a acción o descartar/ajustar
-5. Solo si el usuario decide ejecutar → la intención pulida va a **North**
-6. **North** (el cerebro) la serializa en plan y delega: **Executor** → **Auditor**
-7. North devuelve el resultado a Refiner, Refiner lo sintetiza al usuario
+5. Solo si el usuario decide ejecutar → la acción formulada va a **North**
+6. **North** es dueño operativo del ciclo completo: usa `econative_plan({ action: "design", intention, phases, tasks })` para descomponer la acción, marca `start` antes de cada trabajo, coordina **Executor/Auditor**, marca `close` al terminar cada tarea y usa `status` para revisar progreso.
+7. North usa `econative_plan_read` cuando necesita leer el plan completo y `econative_plan_archive` al cerrar un plan completo. Son helpers legítimos del mismo ciclo del plan, no sistemas alternativos ni duplicados: `econative_plan` sigue siendo la única tool de mutación/gestión operativa; `econative_plan_read` y `econative_plan_archive` completan el ciclo.
+8. North devuelve el resultado a Refiner, Refiner lo sintetiza al usuario
+
+### Lectura post-compactación
+
+- Refiner puede leer el plan después de compactación si la conversación quedó en Refiner.
+- North puede leerlo si la compactación ocurrió en North.
+- Auditor puede leerlo cuando la revisión necesita contexto del plan.
+- Executor no necesita administrar ni aprender el plan completo; recibe una tarea concreta.
 
 ## ⚖️ ¿Cuándo llamar al Auditor?
 
@@ -160,11 +168,11 @@ North decide según estas reglas:
 
 | Tool | Qué hace |
 |---|---|
-| `econative_start_session` | **Obligatorio** al inicio. Carga contexto, plan y prefs; auto-crea `plan.md` si no existe. |
+| `econative_start_session` | **Obligatorio** al inicio. Carga contexto, preferencias y plan; devuelve `onboarding_required`, `preferences`, `context`, `plan_created` y `plan`, y auto-crea `plan.md` si no existe. Para leer otro estado del proyecto, usá la tool correspondiente. |
 | `econative_context_read` | Lee todos los .md de `workspec/context/` (PROJECT, CONVENTIONS, ARCHITECTURE, STATUS, etc). |
-| `econative_plan` | **Tool única** para gestionar el plan. Acciones: `design`, `start`, `close`, `status`, `archive`. |
-| `econative_plan_read` | Consulta el plan activo (`workspec/plans/active/plan.md`). |
-| `econative_plan_archive` | Helper: archiva plan completado a `workspec/plans/old/` con timestamp. |
+| `econative_plan` | **Única tool de mutación/gestión operativa** del plan. North la usa para `design`, `start`, `close`, `status` y `archive`. |
+| `econative_plan_read` | Helper legítimo del mismo ciclo: consulta el plan activo completo (`workspec/plans/active/plan.md`) cuando el agente necesita leerlo; no es un sistema alternativo ni duplicado. |
+| `econative_plan_archive` | Helper legítimo del mismo ciclo: archiva un plan completado a `workspec/plans/old/` con timestamp; no es un sistema alternativo ni duplicado. |
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
 

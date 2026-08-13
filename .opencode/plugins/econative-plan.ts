@@ -13,10 +13,11 @@
  * Depende de _plan-utils.js para parsing, modificación y formateo.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { tool } from "@opencode-ai/plugin";
 import type { Plugin } from "@opencode-ai/plugin";
+import { archivePlan } from "./econative-plan-archive.js";
 import {
   parsePlan,
   updateTaskStatus,
@@ -317,97 +318,8 @@ export default (async () => {
           // ARCHIVE
           // ─────────────────────────────────────────────────────────────
           if (action === "archive") {
-            if (!existsSync(planPath)) {
-              return JSON.stringify({
-                ok: false,
-                action: "archive",
-                error: "No hay plan activo en workspec/plans/active/plan.md para archivar",
-              });
-            }
-
-            const content = readFileSync(planPath, "utf-8");
-
-            // Generar timestamp para el nombre del archivo
-            const d = new Date();
-            const pad = (n: number) => n.toString().padStart(2, "0");
-            const ts = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
-            const archiveName = `plan-${ts}.md`;
-            const archivePath = join(oldDir, archiveName);
-
-            if (!existsSync(oldDir)) mkdirSync(oldDir, { recursive: true });
-            renameSync(planPath, archivePath);
-
-            // Extraer métricas del plan archivado
-            let archivedStats = {
-              intention: "(no especificada)",
-              completed_tasks: 0,
-              total_tasks: 0,
-              progress: "0%",
-            };
-
-            try {
-              const planData = parsePlan(content);
-              archivedStats = {
-                intention: planData.intention || "(no especificada)",
-                completed_tasks: planData.stats.completedTasks,
-                total_tasks: planData.stats.totalTasks,
-                progress: `${planData.stats.progressPercent}%`,
-              };
-            } catch {
-              const completedTasks = (content.match(/- \[x\]/g) || []).length;
-              const totalTasks = (content.match(/- \[[ xX❌]\]/g) || []).length;
-              archivedStats = {
-                intention: "(extracción falló)",
-                completed_tasks: completedTasks,
-                total_tasks: totalTasks,
-                progress: totalTasks > 0 ? `${Math.round((completedTasks / totalTasks) * 100)}%` : "0%",
-              };
-            }
-
-            // Crear nuevo plan.md vacío con el mismo template que start_session
-            const newIntention = (args.new_intention as string | undefined)?.trim();
-            const template = [
-              "# Plan Activo",
-              "",
-              "## Intención",
-              newIntention || "_pendiente — definir en la próxima sesión_",
-              "",
-              "---",
-              "",
-              "## Fases",
-              "",
-              "### Fase 1: Por definir",
-              "- [ ] _primera tarea_",
-              "",
-              "---",
-              "",
-              "## Dependencias",
-              "",
-              "-",
-              "",
-              "---",
-              "",
-              "## Notas",
-              "",
-              "-",
-              "",
-            ].join("\n");
-
-            writeFileSync(planPath, template, "utf-8");
-
-            return JSON.stringify({
-              ok: true,
-              action: "archive",
-              archived: {
-                file: archiveName,
-                ...archivedStats,
-              },
-              new_plan: {
-                intention: newIntention || "_pendiente_",
-                path: "workspec/plans/active/plan.md",
-              },
-              message: `Plan archivado como ${archiveName}. Nuevo plan creado.`,
-            });
+            const result = await archivePlan(context.directory, (args.new_intention as string | undefined)?.trim());
+            return JSON.stringify({ ...result, action: "archive" });
           }
 
           // ─────────────────────────────────────────────────────────────

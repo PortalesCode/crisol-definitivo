@@ -29,7 +29,7 @@
 3. **ARCHITECTURE.md**: ✅ Template completo de 51 líneas restaurado como referencia.
 4. **Estructura del definitivo**: ✅ `.opencode/` + `workspec/` hermanas, `AGENTS.md` y `opencode.json` en raíz, `install.sh` para el despliegue (sin modo desembarco).
 5. **README idioma**: ✅ RESUELTO — español (README.md creado con ruido de despliegue, AGENTS.md enfocado en el usuario).
-6. **Rol Refiner/North**: ✅ DEFINIDO — Refiner crea el plan, North lo serializa y delega (flujo de 6 agentes: Refiner → triángulo → North → Executor → Auditor).
+6. **Rol Refiner/North**: ✅ DEFINIDO — Refiner entiende/refina la intención y formula la acción; North crea, descompone y administra el ciclo completo del plan (flujo: Refiner → triángulo → North → Executor → Auditor).
 7. **Especialista-Bibliotecario**: ✅ ELIMINADO — la investigación la hereda Refiner (herramienta no bloqueante del entorno, tipo knowledge_search/knowledge_investigate; fallback websearch/webfetch).
 8. **Sistema de domains**: ✅ ELIMINADO — plugins, carpeta y referencias limpiadas.
 9. **sequential-thinking**: ✅ key MCP con nombre real (sin abreviar).
@@ -39,12 +39,8 @@
 
 ## Próximos Pasos
 
-- [x] Instalar con `install.sh` en un repo de prueba (pendiente verificación real)
-- [x] Verificar reinicio de OpenCode tras la instalación (pendiente)
 - [ ] Integrar Engram local (fork desde gentle-ai, solo engram)
 - [ ] Pulir skill autoinstalable + script de reinicio del server
-- [x] Documentar en README la dependencia de entorno de knowledge_search/knowledge_investigate (H5 de auditoría)
-- [ ] Aclarar quién ejecuta `econative_plan design` en runtime (H6 de auditoría)
 - [ ] Typos/ambigüedades menores en Refiner.md (H3, H4 de auditoría)
 
 ---
@@ -53,9 +49,5 @@
 
 | ID | Descripción | Estado | Prioridad |
 |---|---|---|---|
-| CD-1 | Verificar instalación con install.sh en repo de prueba | Abierto | Alta |
-| CD-2 | Verificar reinicio de OpenCode post-instalación | Abierto | Alta |
 | CD-3 | Engram local (fork) sin integrar | Abierto | Media |
 | CD-4 | Skill autoinstalable sin pulir | Abierto | Media |
-| CD-5 | README: dependencia knowledge_search/knowledge_investigate documentada, con tools portables y variables configurables | Completado | Baja |
-| CD-6 | Aclarar ejecutor de econative_plan design en runtime | Abierto | Baja |

@@ -28,12 +28,20 @@ Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
 
 ## Pasos detallados del instalador
 
-1. Copiá o cloná el paquete `crisol-definitive` dentro del repo donde querés trabajar.
-2. Ejecutá el instalador:
+1. Cloná el paquete en una ubicación fija (una sola vez):
 
    ```bash
-   ./install.sh
+   git clone https://github.com/PortalesCode/crisol-definitive.git ~/crisol-definitive
    ```
+
+2. Parate en la raíz de TU proyecto y ejecutá el instalador:
+
+   ```bash
+   cd /ruta/a/tu/proyecto
+   ~/crisol-definitive/install.sh
+   ```
+
+   Si ya estás en la raíz del proyecto, ejecutá directamente `~/crisol-definitive/install.sh`.
 
 3. El instalador despliega `.opencode/` (agentes, skills, plugins), `workspec/` (context, planes, preferencias del usuario), `AGENTS.md` y `opencode.json` dentro del repo destino.
 4. **Reiniciá OpenCode** para que skills, plugins y MCPs tomen efecto.
@@ -126,4 +134,4 @@ crisol-definitive/
   - Si NO lo tenés en global → lo agrega al `opencode.json` **local** del proyecto destino, con **backup `.bak`** antes de escribir y **verificación post-escritura** (JSON válido + contiene `engram`, con rollback desde el backup si falla). Así el MCP queda disponible sin arriesgar tu config global.
 - El instalador la propone como **Paso 6/6** (opcional, no bloqueante): detecta si ya está instalada, la instala si falta (o pregunta) y mergea su protocolo al `AGENTS.md` global de OpenCode (`~/.config/opencode/AGENTS.md`) con un merge sano por marcadores (`ENGRAM-MEMORY-START`). Solo llama a `setup_engram_mcp` (MCP local) cuando el binario `engram` quedó disponible.
 - Si ya la usás, el instalador **no toca tu `AGENTS.md` global**: el merge es idempotente y solo agrega el bloque del protocolo si no lo tenés ya. Si no la tenés, podés instalarla después con `brew install gentleman-programming/tap/engram` o `go install github.com/Gentleman-Programming/engram/cmd/engram@latest`.
-- Variables de entorno: `INSTALL_GRAPHIFY` e `INSTALL_ENGRAM` se pueden overridear (`ask` | `yes` | `no`) — útil para testing no invasivo (ej: `INSTALL_ENGRAM=no ./install.sh`).
+- Variables de entorno: `INSTALL_GRAPHIFY` e `INSTALL_ENGRAM` se pueden overridear (`ask` | `yes` | `no`) — útil para testing no invasivo (ej: `INSTALL_ENGRAM=no ~/crisol-definitive/install.sh`).
