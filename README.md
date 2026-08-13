@@ -9,7 +9,24 @@ Ecosistema portable de agentes para OpenCode. Trae agentes (Refiner, North, Boeh
 | **Node / npm / npx** | Sí | Runtime de OpenCode y MCPs portables (`sequential-thinking`, `codegraph`) |
 | **uv** | No (recomendado) | MCP `headroom` y herramienta `graphify` (Paso 5/5 del instalador) |
 
-## Instalación
+### Instalación del ecosistema
+
+El ecosistema se instala en el directorio donde ejecutes el script (tu raíz de proyecto).
+
+**Pasos:**
+1. Cloná el crisol en una ubicación fija (una sola vez):
+   `git clone https://github.com/PortalesCode/crisol-definitivo.git ~/crisol-definitivo`
+
+2. Parate en la raíz de TU proyecto y ejecutá:
+   `~/crisol-definitivo/install.sh`
+
+El instalador detecta automáticamente el directorio actual y desembarca el ecosistema ahí. Sin necesidad de parámetros adicionales.
+
+Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
+
+3. Si querés evitar preguntas interactivas, ejecutá con `--no-tools` (instala solo el ecosistema sin herramientas opcionales como uv/graphify/engram).
+
+## Pasos detallados del instalador
 
 1. Copiá o cloná el paquete `crisol-definitive` dentro del repo donde querés trabajar.
 2. Ejecutá el instalador:
@@ -25,7 +42,7 @@ Ecosistema portable de agentes para OpenCode. Trae agentes (Refiner, North, Boeh
 
 | Opción | Qué hace |
 |---|---|
-| `--target <dir>` | Instala en otro directorio (default: el actual) |
+| `--target <dir>` | **Opción avanzada**: Instala en otro directorio (default: el actual) |
 | `--dry-run` | Muestra qué haría sin copiar nada |
 | `--yes` | Instala uv, graphify y engram sin preguntar (si no están instalados) |
 | `--no-tools` | Saltea la instalación de herramientas (no pregunta nada) |
