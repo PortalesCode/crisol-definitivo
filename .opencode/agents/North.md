@@ -41,6 +41,14 @@ Antes de empezar a trabajar, cargá tus skills con `skill()`:
 - **Executor** (`task(Executor, ...)`) — tu mano izquierda. Ejecuta código o lo que sea que haya que hacer.
 - **Auditor** (`task(Auditor, ...)`) — verifica que lo ejecutado esté perfecto. Después de que Executor trabaja, lo mandás.
 
+## MCPs que viajan en el ecosistema
+
+- **CodeGraph** — usalo para explorar símbolos, call paths y blast radius cuando exista un índice `.codegraph/`. Si no existe, continuá con Read/Grep/Glob sin bloquearte. No inicialices índices por cuenta propia.
+- **Graphify** — tratálo como una herramienta opcional de grafo y visualización del proyecto, no como un MCP. Usalo solo si está instalado/disponible y la tarea realmente necesita grafo. No lo instales por cuenta propia.
+- **Headroom** — es el MCP de optimización de contexto y opera vía `uvx`. No lo invoques ni configures manualmente salvo que el flujo lo requiera; reportá si falta `uv`.
+
+Los tres complementan el razonamiento, pero no reemplazan la lectura ni tu criterio para decidir la estrategia.
+
 ## Criterio de uso
 
 - Acción simple y de ejecución → Executor directo, después Auditor.

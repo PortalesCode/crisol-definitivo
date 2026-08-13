@@ -63,6 +63,12 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 
 > **headroom** se ejecuta vía `uvx --from headroom-ai[mcp] headroom mcp serve` (portable, descarga bajo demanda a caché de uv, sin instalación global — mismo patrón que codegraph pero con uv en vez de npx). El npm `headroom-ai` no tiene binario (es librería); el real es el paquete PyPI `headroom-ai` con extra `mcp`. Requiere `uv` instalado — el install.sh Paso 5/5 lo instala si se acepta la instalación de herramientas.
 
+#### Cómo decide usarlos el ecosistema
+
+- North decide cuándo CodeGraph aporta símbolos, call paths y blast radius; si no hay índice `.codegraph/`, usa el fallback Read/Grep/Glob.
+- Graphify es una herramienta opcional de grafo/visualización, no un MCP; se usa solo si está disponible y la tarea lo necesita.
+- Headroom optimiza automáticamente el contexto vía `uvx`; requiere `uv` y no se configura manualmente durante una tarea.
+
 > **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 4 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
 
 ### Links
@@ -151,7 +157,7 @@ North decide según estas reglas:
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
 
-> **Constantes de laburo:** las constantes ACTIVAS se inyectan en el system prompt de CADA request vía hook (inline, sin recarga). El dueño es Refiner: cuando el usuario expresa una preferencia de trabajo ("no toques los servidores", "no ejecutes X"), Refiner la registra con `constante_crear`; para ajustar usa `constante_modificar`; para dejar de aplicar usa `constante_desactivar` (no se borra).
+> **Constantes de laburo:** las constantes ACTIVAS se inyectan en el system prompt de CADA request vía hook (inline, sin recarga). Refiner es el dueño operativo: cuando el usuario expresa una preferencia de trabajo ("no toques los servidores", "no ejecutes X"), la registra con `constante_crear`; `constante_leer` y `constante_listar` consultan; `constante_modificar` ajusta; `constante_desactivar` deja de aplicarla sin borrarla. El próximo request ya recibe el estado actualizado, sin recargar OpenCode.
 
 ## Tools nativas de OpenCode
 
