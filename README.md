@@ -47,7 +47,7 @@ Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
 | `--yes` | Instala uv, graphify y engram sin preguntar (si no están instalados) |
 | `--no-tools` | Saltea la instalación de herramientas (no pregunta nada) |
 
-> **Paso 5/5 (uv + graphify):** al final, el instalador pregunta si instalás `uv` (requisito del MCP `headroom`) y `graphify` (herramienta opcional de grafo de conocimiento del código). Es interactivo `[s/N]`; usá `--yes` para aceptar sin preguntar o `--no-tools` para saltear. No es bloqueante: el resto del ecosistema funciona igual.
+> **Pasos 5/5 y 6/6 (uv + graphify + engram):** al final, el instalador pregunta si instalás `uv` (requisito del MCP `headroom`), `graphify` (herramienta opcional de grafo de conocimiento del código) y `engram` (memoria persistente global). Es interactivo `[s/N]`; usá `--yes` para aceptar la instalación de uv, graphify y engram sin preguntar o `--no-tools` para saltear las herramientas opcionales. No es bloqueante: el resto del ecosistema funciona igual.
 
 ## MCPs incluidos
 
