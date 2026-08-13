@@ -1,8 +1,9 @@
 /**
- * econative-plan.ts — Tool unificada de gestión del plan activo
+ * econative-plan.ts — Tool única de mutación/gestión operativa del plan activo
  *
- * Reemplaza econative-task-init, econative-task-closeout, econative-plan-read
- * y econative-plan-archive en una sola función con 5 acciones:
+ * econative_plan_read y econative_plan_archive son helpers legítimos del mismo
+ * ciclo del plan (leer el plan activo / archivar un plan completado), no tools
+ * reemplazadas por esta. Esta tool sigue siendo la única que MUTA el plan, con 5 acciones:
  *
  *   design   → Genera un plan.md completo desde cero
  *   start    → Marca una tarea existente como en curso (🔵)
@@ -33,8 +34,9 @@ export default (async () => {
     tool: {
       econative_plan: tool({
         description:
-          "Tool unificada para gestionar el plan activo (workspec/plans/active/plan.md). "
-          + "Reemplaza task-init, task-closeout, plan-read y plan-archive en una sola función. "
+          "Tool única de mutación/gestión operativa del plan activo (workspec/plans/active/plan.md). "
+          + "econative_plan_read y econative_plan_archive son helpers legítimos del mismo ciclo del plan "
+          + "(leer el plan activo / archivar un plan completado), no reemplazados por esta tool. "
           + "Acciones: design (generar plan), start (iniciar tarea), close (cerrar tarea), "
           + "status (consultar estado), archive (archivar plan).",
 

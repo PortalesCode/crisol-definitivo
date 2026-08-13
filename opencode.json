@@ -10,7 +10,7 @@
     "codegraph": {
       "type": "local",
       "enabled": true,
-      "command": ["npx", "-y", "@colbymchenry/codegraph", "serve", "--mcp"]
+      "command": ["npx", "-y", "@colbymchenry/codegraph@1.5.0", "serve", "--mcp"]
     },
     "headroom": {
       "type": "local",

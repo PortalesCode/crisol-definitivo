@@ -51,6 +51,8 @@ Antes de empezar a trabajar, cargá tus skills con `skill()`:
 
 Estas herramientas complementan el razonamiento, pero no reemplazan la lectura ni tu criterio para decidir la estrategia.
 
+**Índice CodeGraph:** si la acción de Refiner incluye "Paso previo: codegraph init", North lo recibe como tarea de preparación del plan y lo delega a Executor. North no decide el init por su cuenta; si no viene en la acción, usa el fallback Read/Grep/Glob.
+
 ## Criterio de herramientas de razonamiento y análisis
 
 - **Sequential Thinking** se usa solo para problemas complejos, tradeoffs, arquitectura o planificación no obvia; no lo uses por rutina.

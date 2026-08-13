@@ -32,7 +32,7 @@ Refiner actualiza esta sección automáticamente. Consultala para saber qué ski
 
 ### Skills externas
 
-Skills de terceros o custom del proyecto. Viven en `.opencode/skills/extern/<nombre-de-la-skill>/Skill.md`.
+Skills de terceros o custom del proyecto. Viven en `.opencode/skills/extern/<nombre-de-la-skill>/SKILL.md`.
 
 - _(sin skills externas instaladas)_
 
@@ -69,6 +69,8 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 - `context7` — documentación de librerías bajo demanda (remoto)
 
 > **codegraph** se ejecuta vía `npx -y @colbymchenry/codegraph` (portable, el runtime lo levanta sin instalación global — mismo patrón que `sequential-thinking`). El paquete npm `codegraph` sin scope NO es el real; el real es `@colbymchenry/codegraph@1.5.0`. Usa un índice `.codegraph/` opcional por proyecto, creado con `codegraph init`; sin índice, el agente usa sus tools nativas (Read/Grep/Glob) — no bloquea nada.
+
+**Decisión de `codegraph init`:** Refiner lo propone al formular la acción (criterios: proyecto grande, módulos cruzados, necesidad de blast radius/call paths, trabajo de largo plazo). El usuario aprueba. North lo recibe como tarea de preparación. Executor lo ejecuta — única vía de init permitida. Auditor solo usa el índice existente. Nadie inicializa por cuenta propia.
 
 > **graphify** no es un MCP en `opencode.json`: es una herramienta opcional (paquete PyPI `graphifyy`, CLI global) que se instala con el Paso 5/5 del `install.sh` (interactivo, `--yes`/`--no-tools`) o vía `uv tool install graphifyy`. Se integra como herramienta + skill (`graphify install --platform opencode`).
 
@@ -208,10 +210,11 @@ La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para l
 
 ## Contexto
 
-- `workspec/context/PROJECT.md` — qué es el proyecto
-- `workspec/context/ARCHITECTURE.md` — arquitectura
-- `workspec/context/CONVENTIONS.md` — reglas
-- `workspec/context/STATUS.md` — estado/issue
+- `workspec/context/PROJECT.md` — qué es el proyecto anfitrión
+- `workspec/context/ARCHITECTURE.md` — arquitectura del proyecto anfitrión
+- `workspec/context/CONVENTIONS.md` — reglas del repo anfitrión
+- `workspec/context/STATUS.md` — estado del TRABAJO del proyecto anfitrión
+- `workspec/context/STATUS-AGENTES.md` — referencia viva del ecosistema dev (rondas, decisiones, issues CD-x). NO es el estado del anfitrión.
 
 ## Notas
 

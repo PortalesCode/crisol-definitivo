@@ -36,6 +36,7 @@ econative_context_read — Leer contexto (PROJECT, CONVENTIONS, ARCHITECTURE, ST
 econative_plan_read — Consultar plan activo (workspec/plans/active/plan.md)
 econative_plan_archive — Archivar plan completado a old/
 econative_save_preferences — Guardar nombre e idioma del usuario
+constante_crear/leer/listar/modificar/desactivar — Constantes de laburo del usuario (gestión: Refiner)
 
 ## 🧰 Matriz operativa
 

@@ -41,6 +41,8 @@ Antes de empezar cualquier tarea, cargá tus skills de trabajo con `skill()`:
 - **Headroom:** MCP automático de contexto vía `uvx`; no lo configures manualmente. Si no funciona por falta de `uv`, reportá la limitación sin bloquear el trabajo.
 - Las constantes de laburo no se crean desde Executor salvo pedido explícito de North; respetá las activas inyectadas en cada request.
 
+**CodeGraph init:** `codegraph init` se ejecuta SOLO si la tarea asignada por North lo incluye explícitamente (viene de una acción aprobada). Nunca se inicializa por cuenta propia. Después del init, usar el índice para consultas de símbolos/call paths/blast radius.
+
 ### Criterio de uso
 
 - Usá **CodeGraph** si North lo indicó o si hace falta consultar símbolos, call paths o blast radius; sin índice, mantené el fallback Read/Grep/Glob.

@@ -36,6 +36,8 @@ Antes de empezar a revisar, cargá tu skill con `skill()`:
 - **Headroom:** opera automáticamente; si falta `uv`, reportá la limitación y no intentes reconfigurarlo.
 - Verificá que los cambios respeten las constantes de laburo activas; no crees, modifiques ni desactives constantes durante una auditoría salvo pedido explícito.
 
+**CodeGraph init:** el Auditor nunca inicializa el índice; solo usa el índice existente para verificar referencias, call paths, dependencias y blast radius. Si no hay índice, usa el fallback Read/Grep/Glob.
+
 ### Criterio de uso
 
 - Usá **CodeGraph** para verificar referencias, call paths, dependencias y blast radius cuando exista un índice; sin índice, mantené el fallback Read/Grep/Glob.

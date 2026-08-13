@@ -31,7 +31,7 @@ Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
 1. Cloná el paquete en una ubicación fija (una sola vez):
 
    ```bash
-   git clone https://github.com/PortalesCode/crisol-definitive.git ~/crisol-definitive
+   git clone https://github.com/PortalesCode/crisol-definitivo.git ~/crisol-definitivo
    ```
 
 2. Parate en la raíz de TU proyecto y ejecutá el instalador:
@@ -110,10 +110,12 @@ crisol-definitive/
 │   ├── skills/       # Skills nativas por dueño (north/, executor/, auditor/, refiner/)
 │   ├── tools/        # Tools locales de conocimiento
 │   └── plugins/      # Tools del ecosistema (econative_*)
+├── Agents-engram-memory/ # Protocolo engram (se mergea al AGENTS.md global)
 ├── workspec/
-│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS
+│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS, STATUS-AGENTES
 │   ├── plans/        # Plan activo y archivados
 │   ├── preferences-user/ # Preferencias del usuario (nombre, idioma)
+│   └── constante/    # Constantes de laburo del usuario (contantes.md)
 ├── AGENTS.md         # Cómo trabajan los agentes (lo lee OpenCode al inicio)
 ├── opencode.json     # Config: MCPs, subagent_depth
 └── install.sh        # Instalador portable por proyecto

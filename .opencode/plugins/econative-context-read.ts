@@ -8,7 +8,7 @@ export default (async () => {
     tool: {
       econative_context_read: tool({
         description:
-          "Lee los 4 archivos de contexto del proyecto (PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md, STATUS.md) "
+          "Lee todos los archivos .md de workspec/context/ (PROJECT.md, CONVENTIONS.md, ARCHITECTURE.md, STATUS.md, STATUS-AGENTES.md, etc) "
           + "desde workspec/context/ en la raíz del proyecto. Devuelve cada archivo con su nombre y contenido completo. "
           + "Útil para que Refiner consulte el estado actual del proyecto sin depender de start_session.",
         args: {},
