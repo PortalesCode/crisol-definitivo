@@ -43,7 +43,7 @@
 - [x] Verificar reinicio de OpenCode tras la instalación (pendiente)
 - [ ] Integrar Engram local (fork desde gentle-ai, solo engram)
 - [ ] Pulir skill autoinstalable + script de reinicio del server
-- [ ] Documentar en README la dependencia de entorno de knowledge_search/knowledge_investigate (H5 de auditoría)
+- [x] Documentar en README la dependencia de entorno de knowledge_search/knowledge_investigate (H5 de auditoría)
 - [ ] Aclarar quién ejecuta `econative_plan design` en runtime (H6 de auditoría)
 - [ ] Typos/ambigüedades menores en Refiner.md (H3, H4 de auditoría)
 
@@ -57,5 +57,5 @@
 | CD-2 | Verificar reinicio de OpenCode post-instalación | Abierto | Alta |
 | CD-3 | Engram local (fork) sin integrar | Abierto | Media |
 | CD-4 | Skill autoinstalable sin pulir | Abierto | Media |
-| CD-5 | README: documentar dependencia knowledge_search/knowledge_investigate del entorno | Abierto | Baja |
+| CD-5 | README: dependencia knowledge_search/knowledge_investigate documentada, con tools portables y variables configurables | Completado | Baja |
 | CD-6 | Aclarar ejecutor de econative_plan design en runtime | Abierto | Baja |

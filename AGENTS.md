@@ -36,6 +36,17 @@ Skills de terceros o custom del proyecto. Viven en `.opencode/skills/extern/<nom
 
 - _(sin skills externas instaladas)_
 
+### Tools locales de conocimiento
+
+Las tools locales viven en `.opencode/tools/` y se cargan como parte del ecosistema:
+
+| Tool | Qué hace |
+|---|---|
+| `knowledge_search` | Consulta la biblioteca configurable mediante `KNOWLEDGE_LIBRARY_HOME` (default: `~/biblioteca-conocimientos`). Sin `target`, lista o busca entradas; con `target`, lee una entrada completa; `sections` limita las secciones devueltas. |
+| `knowledge_investigate` | Investiga un tema nuevo mediante el webhook n8n configurable por `N8N_KNOWLEDGE_WEBHOOK_URL` (default: localhost). Es asíncrona/fire-and-forget y hace dedupe antes de encolar. |
+
+La biblioteca de conocimiento y n8n son dependencias externas configurables: no se incluyen ni viajan con este repositorio. Si no están disponibles, Refiner debe informarlo y aplicar el fallback documentado (`websearch`/`webfetch`).
+
 ### Skills nativas
 
 | Skill | Dueño | Propósito |
@@ -156,6 +167,8 @@ North decide según estas reglas:
 | `econative_plan_archive` | Helper: archiva plan completado a `workspec/plans/old/` con timestamp. |
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
+
+La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para las tools locales de conocimiento. Estas tools y sus dependencias externas no deben confundirse con los plugins del ecosistema.
 
 > **Constantes de laburo:** las constantes ACTIVAS se inyectan en el system prompt de CADA request vía hook (inline, sin recarga). Refiner es el dueño operativo: cuando el usuario expresa una preferencia de trabajo ("no toques los servidores", "no ejecutes X"), la registra con `constante_crear`; `constante_leer` y `constante_listar` consultan; `constante_modificar` ajusta; `constante_desactivar` deja de aplicarla sin borrarla. El próximo request ya recibe el estado actualizado, sin recargar OpenCode.
 

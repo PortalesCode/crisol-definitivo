@@ -38,6 +38,19 @@ Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
 3. El instalador despliega `.opencode/` (agentes, skills, plugins), `workspec/` (context, planes, preferencias del usuario), `AGENTS.md` y `opencode.json` dentro del repo destino.
 4. **Reiniciá OpenCode** para que skills, plugins y MCPs tomen efecto.
 
+### Tools locales de conocimiento: instalación y configuración
+
+El ecosistema incluye las tools locales `knowledge_search` y `knowledge_investigate` en `.opencode/tools/`. Copiar o instalar Crisol no copia la biblioteca externa `~/biblioteca-conocimientos` ni instala o configura n8n automáticamente.
+
+Si ya tenés la biblioteca y n8n configurados, las tools funcionan con sus valores por defecto. En cualquier otro caso, definí las variables apuntando a tus servicios:
+
+```bash
+export KNOWLEDGE_LIBRARY_HOME="$HOME/biblioteca-conocimientos"
+export N8N_KNOWLEDGE_WEBHOOK_URL="http://localhost:5678/webhook/investigar-conocimiento"
+```
+
+`knowledge_search` busca primero en la biblioteca; `knowledge_investigate` encola investigaciones nuevas de forma asíncrona mediante n8n, con deduplicación previa. Si alguna dependencia no está disponible, Refiner informa la limitación y puede usar `websearch`/`webfetch` como fallback.
+
 ### Opciones de `install.sh`
 
 | Opción | Qué hace |
@@ -87,6 +100,7 @@ crisol-definitive/
 ├── .opencode/
 │   ├── agents/       # Refiner, North, Boehmio, Realistic, Executor, Auditor
 │   ├── skills/       # Skills nativas por dueño (north/, executor/, auditor/, refiner/)
+│   ├── tools/        # Tools locales de conocimiento
 │   └── plugins/      # Tools del ecosistema (econative_*)
 ├── workspec/
 │   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS

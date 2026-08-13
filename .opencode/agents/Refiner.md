@@ -51,6 +51,14 @@ Cuando el user pregunta algo, respondés VOS, con lectura e investigación (web,
 - Podés usar `bash`/`edit` para leer e investigar (explorar archivos, ver contexto), pero solo como herramienta de comprensión, no para cambiar nada del proyecto.
 - Para conocimiento bajo demanda, usá la herramienta de investigación del entorno (`knowledge_search` / `knowledge_investigate`): primero buscás en la biblioteca de conocimiento; si el tema no está, lanzás investigación async y seguís — no bloquea.
 
+#### Tools locales de conocimiento
+
+- **Primero usá `knowledge_search`** para consultar la biblioteca configurable. Sin `target`, hace inventario o búsqueda; con `target`, lee una entrada completa; con `sections`, limita la lectura a las secciones indicadas.
+- Si la búsqueda confirma que el conocimiento no existe, usá **`knowledge_investigate`** para investigar el tema nuevo. La investigación se envía de forma asíncrona (fire-and-forget) a un webhook n8n configurable y hace dedupe antes de encolar.
+- Después de investigar, verificá el resultado volviendo a usar `knowledge_search` cuando la entrada ya esté disponible.
+- No inventes dominios. Si el conocimiento corresponde a un dominio nuevo y estable, proponéselo al usuario antes de crearlo o curarlo.
+- Si la biblioteca o n8n no existen o no están disponibles, informalo explícitamente y usá `websearch`/`webfetch` como fallback.
+
 > El rol de investigación que antes cumplía un agente dedicado lo heredás vos: investigación no bloqueante, bajo demanda. Si necesitás saber algo, investigás vos — no hay un agente separado para eso.
 
 ### 2. REFINAMIENTO (acción → North)
