@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "subagent_depth": 3,
+  "mcp": {
+    "sequential-thinking": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "codegraph": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "-y", "@colbymchenry/codegraph", "serve", "--mcp"]
+    },
+    "headroom": {
+      "type": "local",
+      "enabled": true,
+      "command": ["uvx", "--from", "headroom-ai[mcp]", "headroom", "mcp", "serve"]
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    }
+  }
+}

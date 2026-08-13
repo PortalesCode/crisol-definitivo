@@ -1,0 +1,18 @@
+# Node
+node_modules/
+*.log
+
+# OpenCode ecosistema
+.opencode/plugins/dist/
+.opencode/plugins/*.js
+
+# Indexes y generados
+.codegraph/
+graphify-out/
+
+# Planes archivados (no viajan con el ecosistema)
+workspec/plans/old/
+
+# Sistema
+.DS_Store
+Thumbs.db
