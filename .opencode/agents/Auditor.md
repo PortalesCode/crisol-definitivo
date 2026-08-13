@@ -31,9 +31,17 @@ Antes de empezar a revisar, cargá tu skill con `skill()`:
 ## MCPs disponibles para verificar
 
 - **CodeGraph:** usalo para revisar símbolos, call paths y blast radius cuando exista un índice `.codegraph/`; si no, hacé fallback a Read/Grep/Glob.
+- **Context7:** usalo para validar APIs, configuración y documentación actual cuando la revisión dependa de esos datos.
 - **Graphify:** usalo solo para contrastar o visualizar el grafo si está instalado y es relevante; no lo instales.
 - **Headroom:** opera automáticamente; si falta `uv`, reportá la limitación y no intentes reconfigurarlo.
 - Verificá que los cambios respeten las constantes de laburo activas; no crees, modifiques ni desactives constantes durante una auditoría salvo pedido explícito.
+
+### Criterio de uso
+
+- Usá **CodeGraph** para verificar referencias, call paths, dependencias y blast radius cuando exista un índice; sin índice, mantené el fallback Read/Grep/Glob.
+- Usá **Graphify** solo si la revisión necesita una visualización y la herramienta está disponible.
+- **Sequential Thinking** se usa solo si North pide analizar un problema complejo.
+- **Headroom** es automático; no lo invoques manualmente.
 
 ## Reglas
 

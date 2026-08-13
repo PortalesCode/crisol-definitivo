@@ -47,8 +47,16 @@ Antes de empezar a trabajar, cargá tus skills con `skill()`:
 - **CodeGraph** — usalo para explorar símbolos, call paths y blast radius cuando exista un índice `.codegraph/`. Si no existe, continuá con Read/Grep/Glob sin bloquearte. No inicialices índices por cuenta propia.
 - **Graphify** — tratálo como una herramienta opcional de grafo y visualización del proyecto, no como un MCP. Usalo solo si está instalado/disponible y la tarea realmente necesita grafo. No lo instales por cuenta propia.
 - **Headroom** — es el MCP de optimización de contexto y opera vía `uvx`. No lo invoques ni configures manualmente salvo que el flujo lo requiera; reportá si falta `uv`.
+- **Context7** — usalo solo si necesitás confirmar una dependencia, API o versión para decidir la estrategia.
 
-Los tres complementan el razonamiento, pero no reemplazan la lectura ni tu criterio para decidir la estrategia.
+Estas herramientas complementan el razonamiento, pero no reemplazan la lectura ni tu criterio para decidir la estrategia.
+
+## Criterio de herramientas de razonamiento y análisis
+
+- **Sequential Thinking** se usa solo para problemas complejos, tradeoffs, arquitectura o planificación no obvia; no lo uses por rutina.
+- Vos decidís cuándo **CodeGraph** aporta símbolos, call paths, dependencias o blast radius. Si no existe un índice `.codegraph/`, mantené el fallback Read/Grep/Glob.
+- Vos decidís si **Graphify** aporta un grafo o visualización útil; es opcional y no es un MCP.
+- **Headroom** opera automáticamente vía MCP/`uvx`; no lo invoques manualmente.
 
 ## Criterio de uso
 

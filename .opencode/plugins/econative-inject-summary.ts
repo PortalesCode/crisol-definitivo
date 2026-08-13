@@ -37,6 +37,16 @@ econative_plan_read — Consultar plan activo (workspec/plans/active/plan.md)
 econative_plan_archive — Archivar plan completado a old/
 econative_save_preferences — Guardar nombre e idioma del usuario
 
+## 🧰 Matriz operativa
+
+Refiner → knowledge_search/knowledge_investigate + Context7 para investigar y precisar la acción.
+North → Sequential Thinking solo para complejidad no obvia; decide CodeGraph/Graphify; Context7 para decisiones de APIs.
+Executor → Context7 para implementar APIs; CodeGraph/Graphify cuando North lo indique o la tarea lo necesite.
+Auditor → CodeGraph/Context7 para verificar; Graphify solo si aporta visualización.
+Headroom → automático vía MCP/uvx; ningún agente lo invoca manualmente.
+
+Context7 = documentación bajo demanda. Sequential Thinking no es rutinario. CodeGraph requiere índice opcional y tiene fallback Read/Grep/Glob. Graphify no es MCP ni se instala por cuenta propia.
+
 ## 🔄 Post-compactación
 
 Si ves una compactación de contexto o retomás la sesión con contexto reducido, ejecutá `econative_context_read` + `econative_plan_read` DIRECTAMENTE para recuperar el contexto del proyecto y el plan activo antes de continuar. No esperes a que te lo pidan.

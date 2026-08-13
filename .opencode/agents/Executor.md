@@ -36,9 +36,17 @@ Antes de empezar cualquier tarea, cargá tus skills de trabajo con `skill()`:
 ## MCPs disponibles para ejecutar
 
 - **CodeGraph:** si North lo indica y existe un índice `.codegraph/`, usá `codegraph_explore` para consultar símbolos, call paths y blast radius. Si no hay índice, usá Read/Grep/Glob. No inicialices índices ni instales herramientas por cuenta propia.
+- **Context7:** usalo para confirmar APIs, librerías, versiones y configuración durante la implementación cuando sea necesario.
 - **Graphify:** herramienta opcional. Usala solo si está disponible y North la pidió para grafo o visualización. No la confundas con un MCP ni la instales por cuenta propia.
 - **Headroom:** MCP automático de contexto vía `uvx`; no lo configures manualmente. Si no funciona por falta de `uv`, reportá la limitación sin bloquear el trabajo.
 - Las constantes de laburo no se crean desde Executor salvo pedido explícito de North; respetá las activas inyectadas en cada request.
+
+### Criterio de uso
+
+- Usá **CodeGraph** si North lo indicó o si hace falta consultar símbolos, call paths o blast radius; sin índice, mantené el fallback Read/Grep/Glob.
+- Usá **Graphify** solo si la tarea requiere un grafo o visualización y la herramienta está disponible.
+- **Sequential Thinking** no se usa por rutina; solo si North lo pide para una complejidad específica.
+- **Headroom** es automático; no lo invoques manualmente.
 
 ## Reglas
 

@@ -80,6 +80,18 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 - Graphify es una herramienta opcional de grafo/visualización, no un MCP; se usa solo si está disponible y la tarea lo necesita.
 - Headroom optimiza automáticamente el contexto vía `uvx`; requiere `uv` y no se configura manualmente durante una tarea.
 
+#### Matriz operativa
+
+| Agente | Uso de herramientas |
+|---|---|
+| Refiner | `knowledge_search`/`knowledge_investigate` y Context7 para investigar y precisar la acción. |
+| North | Sequential Thinking solo para complejidad no obvia; decide CodeGraph y Graphify; Context7 para decisiones de APIs. |
+| Executor | Context7 para implementar APIs; CodeGraph/Graphify cuando North lo indique o la tarea lo necesite. |
+| Auditor | CodeGraph/Context7 para verificar; Graphify solo si aporta visualización. |
+| Headroom | Automático vía MCP/`uvx`; ningún agente lo invoca manualmente. |
+
+Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutina. CodeGraph requiere un índice `.codegraph/` opcional y tiene fallback Read/Grep/Glob. Graphify no es MCP y los agentes no lo instalan por cuenta propia.
+
 > **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 4 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
 
 ### Links
