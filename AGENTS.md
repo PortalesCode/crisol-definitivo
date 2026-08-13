@@ -155,8 +155,12 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 ### Continuidad Refiner ↔ North
 
 - **Refiner** debe entregar a North una acción técnica completa y cerrada.
-- **North** no pregunta al usuario ni escala dudas rutinarias: solo lo hace ante un bloqueo concreto. Mantiene el plan y la tarea en `in_progress` mientras consulta a Refiner.
-- **Refiner** resuelve la consulta o usa `question()` como último recurso; después retoma con North usando el mismo `task_id`.
+- **Protocolo obligatorio:** `North bloqueado → Refiner intenta resolver → solo si no puede → Refiner usa question() con el usuario → Refiner retoma North con el task_id original`.
+- **North** nunca usa `question()` con el usuario ni escala dudas rutinarias, preferencias menores o decisiones resolubles con contexto: solo consulta a Refiner ante un bloqueo concreto, técnico y realmente bloqueante. Mantiene el plan y la tarea en `in_progress` mientras consulta.
+- **Refiner** es el primer nivel de resolución: intenta resolver con la acción original, conversación, contexto, plan, documentación y herramientas disponibles. El usuario es el último nivel; `question()` debe explicar la duda concreta y sus opciones.
+- El `task_id` primario lo obtiene y conserva **Refiner** en la respuesta de su propio `task(North, ...)`. North puede repetirlo al escalar como confirmación, pero Refiner no depende de que North se lo pase.
+- **Refiner** retoma la misma sesión de North con el `task_id` original; no crea una sesión nueva, no reinicia la tarea ni cierra/archiva el plan mientras la duda siga abierta.
+- Si el runtime no permite retomar con el `task_id`, se conservan intención, plan, tarea `in_progress` y punto de bloqueo: no se declara terminado ni se crea una tarea desconectada.
 - **North** continúa la sesión y la tarea originales, y solo las cierra al terminar.
 
 ### Lectura post-compactación
@@ -205,7 +209,7 @@ La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para l
 
 | Tool | Para qué |
 |---|---|
-| `question()` | Preguntar al user con opciones o texto libre |
+| `question()` | Refiner: onboarding o bloqueo imprescindible no resoluble; último recurso. North: no disponible (`question: deny`). |
 | `sequential_thinking` | Razonamiento estructurado multi-paso, solo tareas complejas |
 
 ## Contexto
