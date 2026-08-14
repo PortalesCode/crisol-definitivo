@@ -16,7 +16,116 @@ const textual = (b: Uint8Array) => { try { const s = new TextDecoder("utf-8", { 
 const flags = (s: string) => { const rules: [string, RegExp][] = [["prompt-injection", /(?:ignore|disregard)\s+(?:all\s+)?(?:of\s+the\s+)?(?:your\s+)?(?:previous|prior|above|earlier)\s+instructions|ignore\s+(?:the\s+)?instructions\s+(?:above|earlier|prior)|ignore\s+(?:all\s+)?instructions|system\s+message|jailbreak/i], ["exfiltration", /exfiltrat|upload\s+.*(secret|token|env)/i], ["credential-theft", /api[_ -]?key|password|secret|credential|private\s+key/i], ["remote-execution", /(?:curl|wget)[^\n|]*\|\s*(?:ba)?sh|remote\s+execution/i], ["obfuscation", /base64\s+(-d|--decode)|fromCharCode|eval\s*\(/i], ["policy-evasion", /bypass\s+(?:policy|security)|disable\s+safety/i]]; return rules.filter(([, r]) => r.test(s)).map(([n]) => n) }
 function pendingDependencies(m: D) { const d = dict(m.dependencies) ? m.dependencies : {}; const installed = new Set((Array.isArray(d.installed) ? d.installed : []).map(text)); const out: D[] = (Array.isArray(d.pending) ? d.pending : []).map((x: unknown) => typeof x === "string" ? { name: x, status: "pending" } : { ...x }); for (const kind of ["mcp", "cli", "packages", "environment"]) for (const item of Array.isArray(d[kind]) ? d[kind] : []) { const name = typeof item === "string" ? item : text(item?.name || item?.id || item?.package); if (name && !installed.has(name) && !out.some(x => text(x.name) === name)) out.push(typeof item === "string" ? { name, kind, status: "pending" } : { ...item, kind, status: "pending" }) } return out }
 
-export default tool({ description: "Validates an installed external skill read-only; scripts are never executed.", args: { slug: tool.schema.string(), projectDirectory: tool.schema.string().optional(), allowBinaryUninspected: tool.schema.boolean().optional(), approved: tool.schema.boolean().optional() }, async execute(args, context) { const root = path.resolve(context.directory || process.cwd()); const project = path.resolve(root, args.projectDirectory?.trim() || "."); const result: any = { ok: true, valid: false, slug: args.slug, errors: [], warnings: ["upstream_not_rechecked: upstream provenance was not downloaded during validation"], checks: {}, restart_required: true, message: RESTART, pending_dependencies: [] }; if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(args.slug) || (project !== root && !project.startsWith(`${root}${path.sep}`))) { result.ok = false; result.errors.push("slug o projectDirectory inválido"); return JSON.stringify(result) } const target = path.join(project, ".opencode", "skills", "extern", args.slug); try { if (!(await stat(target)).isDirectory()) throw new Error("skill directory not found"); const all = await filesOnly(target); const installed = all.filter(p => p !== "crisol-eco.yaml"); const skill = await readFile(path.join(target, "SKILL.md")); const metadata = JSON.parse(await readFile(path.join(target, "crisol-eco.yaml"), "utf8")) as D; const errors: string[] = result.errors; result.checks.skill_path = { valid: true }; if (!textual(skill)) errors.push("SKILL.md es binario o no es UTF-8 válido"); const skillText = textual(skill) ? new TextDecoder().decode(skill) : ""; result.checks.integration_block = { valid: /##\s+Crisol-Eco:\s*integración/i.test(skillText) && /<!--\s*crisol-eco:integration\s*-->/i.test(skillText) }; if (!result.checks.integration_block.valid) errors.push("Falta el bloque estable ## Crisol-Eco: integración")
+/** Parsea crisol-eco.yaml: acepta JSON (instalador) o YAML block-style con comentarios (ficha manual). */
+function parseYamlOrJson(text: string): unknown {
+  try {
+    return JSON.parse(text)
+  } catch (jsonError) {
+    try {
+      return parseBlockYaml(text)
+    } catch (yamlError) {
+      throw new Error(`No se pudo parsear crisol-eco.yaml como JSON ni YAML: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`)
+    }
+  }
+}
+function parseBlockYaml(text: string): Record<string, unknown> {
+  return parseBlock(text.split(/\r?\n/), 0, 0).obj
+}
+/** Elimina comentarios `#` (línea completa o trailing), respetando comillas dobles y simples. */
+function stripComment(s: string): string {
+  let quote: '"' | "'" | null = null
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
+    if (ch === '"' || ch === "'") {
+      if (quote === ch) quote = null
+      else if (quote === null) quote = ch
+    } else if (ch === "#" && quote === null) return s.slice(0, i)
+  }
+  return s
+}
+/** Divide un array inline respetando comillas dobles y simples: las comas dentro de strings no cortan. */
+function splitArrayItems(s: string): string[] {
+  const out: string[] = []
+  let current = ""
+  let quote: '"' | "'" | null = null
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
+    if ((ch === '"' || ch === "'") && quote === null) { quote = ch; current += ch }
+    else if (ch === quote) { quote = null; current += ch }
+    else if (ch === "," && quote === null) { out.push(current); current = "" }
+    else current += ch
+  }
+  out.push(current)
+  return out
+}
+function parseScalar(v: string): unknown {
+  const t = v.trim()
+  if (t === "") return ""
+  if (t.startsWith("[")) {
+    if (!t.endsWith("]")) throw new Error(`array sin corchete de cierre: ${t}`)
+    const inner = t.slice(1, -1).trim()
+    if (!inner) return []
+    return splitArrayItems(inner).map((item) => {
+      const el = item.trim()
+      if (el === "") return ""
+      if (el.startsWith('"') || el.startsWith("'")) {
+        if (el.length < 2 || el[el.length - 1] !== el[0]) throw new Error(`string con comillas sin cerrar: ${el}`)
+        return el.slice(1, -1)
+      }
+      const lower = el.toLowerCase()
+      if (lower === "true") return true
+      if (lower === "false") return false
+      if (el === "null" || el === "~") return null
+      if (el !== "" && !isNaN(Number(el))) return Number(el)
+      return el
+    })
+  }
+  if (t.startsWith('"') || t.startsWith("'")) {
+    if (t.length < 2 || t[t.length - 1] !== t[0]) throw new Error(`string con comillas sin cerrar: ${t}`)
+    return t.slice(1, -1)
+  }
+  const lower = t.toLowerCase()
+  if (lower === "true") return true
+  if (lower === "false") return false
+  if (t === "null" || t === "~") return null
+  if (!isNaN(Number(t))) return Number(t)
+  return t
+}
+function parseBlock(lines: string[], start: number, indent: number, depth = 0): { obj: Record<string, unknown>; next: number } {
+  if (depth > 100) throw new Error(`profundidad máxima de anidamiento excedida (>100 niveles)`)
+  const obj: Record<string, unknown> = {}
+  let i = start
+  while (i < lines.length) {
+    const raw = stripComment(lines[i])
+    const trimmed = raw.trim()
+    if (!trimmed) { i++; continue }
+    const leading = raw.length - raw.trimStart().length
+    if (leading < indent) break
+    if (leading > indent) throw new Error(`indentación inesperada (${leading} espacios) en línea: ${trimmed}`)
+    const colon = trimmed.indexOf(":")
+    if (colon < 0) throw new Error(`línea sin clave:valor en el bloque: ${trimmed}`)
+    const key = trimmed.slice(0, colon).trim()
+    const value = trimmed.slice(colon + 1).trim()
+    if (!key) throw new Error(`clave vacía en línea: ${trimmed}`)
+    let j = i + 1
+    while (j < lines.length && !stripComment(lines[j]).trim()) j++
+    if (j < lines.length) {
+      const nLeading = lines[j].length - lines[j].trimStart().length
+      if (nLeading > leading) {
+        if (value) throw new Error(`clave "${key}" tiene valor y bloque anidado a la vez`)
+        const nested = parseBlock(lines, j, nLeading, depth + 1)
+        obj[key] = nested.obj
+        i = nested.next
+        continue
+      }
+    }
+    obj[key] = parseScalar(value)
+    i = j < lines.length ? j : lines.length
+  }
+  return { obj, next: i }
+}
+
+export default tool({ description: "Validates an installed external skill read-only; scripts are never executed.", args: { slug: tool.schema.string(), projectDirectory: tool.schema.string().optional(), allowBinaryUninspected: tool.schema.boolean().optional(), approved: tool.schema.boolean().optional() }, async execute(args, context) { const root = path.resolve(context.directory || process.cwd()); const project = path.resolve(root, args.projectDirectory?.trim() || "."); const result: any = { ok: true, valid: false, slug: args.slug, errors: [], warnings: ["upstream_not_rechecked: upstream provenance was not downloaded during validation"], checks: {}, restart_required: true, message: RESTART, pending_dependencies: [] }; if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(args.slug) || (project !== root && !project.startsWith(`${root}${path.sep}`))) { result.ok = false; result.errors.push("slug o projectDirectory inválido"); return JSON.stringify(result) } const target = path.join(project, ".opencode", "skills", "extern", args.slug); try { if (!(await stat(target)).isDirectory()) throw new Error("skill directory not found"); const all = await filesOnly(target); const installed = all.filter(p => p !== "crisol-eco.yaml"); const skill = await readFile(path.join(target, "SKILL.md")); const metadata = parseYamlOrJson(await readFile(path.join(target, "crisol-eco.yaml"), "utf8")) as D; const errors: string[] = result.errors; result.checks.skill_path = { valid: true }; if (!textual(skill)) errors.push("SKILL.md es binario o no es UTF-8 válido"); const skillText = textual(skill) ? new TextDecoder().decode(skill) : ""; result.checks.integration_block = { valid: /##\s+Crisol-Eco:\s*integración/i.test(skillText) && /<!--\s*crisol-eco:integration\s*-->/i.test(skillText) }; if (!result.checks.integration_block.valid) errors.push("Falta el bloque estable ## Crisol-Eco: integración")
     const c = metadata.compatibility; if (!dict(c) || !OPS.has(text(c.opencode)) || !Array.isArray(c.frameworks) || !c.frameworks.every((x: unknown) => typeof x === "string")) errors.push("compatibility inválida"); const r = metadata.routing, q = metadata.reasoning; if (!dict(r) || !ROUTING.has(text(r.profile)) || !Array.isArray(r.agents) || !r.agents.length || !r.agents.every((a: unknown) => AGENTS.has(text(a)))) errors.push("routing inválido"); if (!dict(q) || !REASONING.has(text(q.mode))) errors.push("reasoning inválido"); if (text(metadata.status) !== "complete") errors.push("metadata.status no es complete"); if (!dict(metadata.preservation) || text(metadata.preservation.status) !== "complete" || metadata.preservation.enumerated !== true) errors.push("preservation no es completa y enumerada")
     const upstream = text(metadata.identity?.upstream_checksum); if (!/^sha256:[0-9a-f]{64}$/.test(upstream)) errors.push("identity.upstream_checksum ausente o inválido"); const verification = metadata.verification?.files; const checksums: D[] = []; if (!Array.isArray(verification) || !verification.length) errors.push("verification.files ausente; no se puede validar integridad instalada"); else { for (const f of verification) { if (!dict(f) || !safe(text(f.relativePath)) || !/^sha256:[0-9a-f]{64}$/.test(text(f.checksum)) || !/^sha256:[0-9a-f]{64}$/.test(text(f.upstream_checksum))) { errors.push("verification.files inválido o sin provenance upstream"); continue } const bytes = await readFile(path.join(target, f.relativePath)).catch(() => null); if (!bytes) { errors.push(`archivo verificado ausente: ${f.relativePath}`); continue } const actual = `sha256:${sha(bytes)}`; const valid = actual === f.checksum; checksums.push({ relativePath: f.relativePath, expected: f.checksum, actual, valid, upstream_checksum: f.upstream_checksum }); if (!valid) errors.push(`checksum installed mismatch: ${f.relativePath}`) } const listed = verification.map((f: D) => f.relativePath).sort(); if (JSON.stringify(listed) !== JSON.stringify(installed.slice().sort())) errors.push("verification.files no enumera exactamente todos los archivos instalados") }
     const binaryFiles: string[] = []; const signals: string[] = []; for (const rel of installed) { const bytes = await readFile(path.join(target, rel)); if (!textual(bytes)) { if (rel === "SKILL.md") errors.push("SKILL.md binario"); else binaryFiles.push(rel) } else signals.push(...flags(new TextDecoder().decode(bytes))) } const approvedBinary = args.allowBinaryUninspected === true && args.approved === true && metadata.security?.binary_uninspected === true && metadata.security?.approved === true; if (binaryFiles.length && !approvedBinary) errors.push(`archivos binarios no inspeccionados: ${binaryFiles.join(", ")}`); if (signals.length) errors.push(`critical security signals: ${[...new Set(signals)].join(", ")}`); result.pending_dependencies = pendingDependencies(metadata); result.checks.upstream_provenance = { valid: /^sha256:[0-9a-f]{64}$/.test(upstream), checksum: upstream, rechecked: false }; result.checks.security_signals = { valid: !signals.length, signals: [...new Set(signals)] }; result.checks.binary = { valid: !binaryFiles.length || approvedBinary, files: binaryFiles, approved: approvedBinary }; result.checksums = { upstream_checksum: { present: Boolean(upstream), value: upstream, compared_against: "upstream identity provenance only", valid: /^sha256:[0-9a-f]{64}$/.test(upstream) }, installed_files: checksums }; result.valid = errors.length === 0; result.ok = result.valid; return JSON.stringify(result) } catch (e) { result.ok = false; result.errors.push(e instanceof Error ? e.message : String(e)); return JSON.stringify(result) } } })
