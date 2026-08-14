@@ -46,6 +46,21 @@ Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
 3. El instalador despliega `.opencode/` (agentes, skills, plugins), `workspec/` (context, planes, preferencias del usuario), `AGENTS.md` y `opencode.json` dentro del repo destino.
 4. **Reiniciá OpenCode** para que skills, plugins y MCPs tomen efecto.
 
+### Proveedor de skills externas
+
+El ecosistema **no mantiene un catálogo curado propio** de skills externas. El proveedor principal es **AgentSkillExchange**:
+
+- Repositorio: <https://github.com/agentskillexchange/skills>
+- Índice: <https://raw.githubusercontent.com/agentskillexchange/skills/main/skills.json>
+
+El índice orienta la búsqueda, pero la instalación conserva como origen la fuente upstream original declarada para cada skill. Las referencias a `PortalesCode` en este README corresponden únicamente al repositorio del ecosistema Crisol Definitive; no son una fuente operativa de skills externas y `skill-library` tampoco lo es.
+
+Al incorporar una skill de terceros, se preserva todo su contenido en `.opencode/skills/extern/<slug>/`, sin eliminar archivos auxiliares, referencias ni scripts. Además, se agrega `crisol-eco.yaml` y el bloque `## Crisol-Eco: integración` con la metadata y el routing de integración.
+
+Las dependencias MCP o CLI de una skill no se instalan implícitamente: el usuario debe aprobarlas como tareas explícitas antes de que Executor las instale.
+
+El routing/refining del ciclo es: **Refiner** analiza y formula; **North** planifica; **Executor** instala; **Auditor** verifica.
+
 ### Tools locales de conocimiento: instalación y configuración
 
 El ecosistema incluye las tools locales `knowledge_search` y `knowledge_investigate` en `.opencode/tools/`. Copiar o instalar Crisol no copia la biblioteca externa `~/biblioteca-conocimientos` ni instala o configura n8n automáticamente.

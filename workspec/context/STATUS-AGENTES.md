@@ -39,6 +39,19 @@
 12. **Separación STATUS.md / STATUS-AGENTES.md**: ✅ HECHA — STATUS.md documenta el proyecto anfitrión; STATUS-AGENTES.md es referencia viva del ecosistema dev.
 13. **Engram**: ✅ DECISIÓN — NO se forkeará por ahora. Se mantiene el criterio de instalación condicional (install.sh lo agrega a opencode.json local solo si no está en config global). No se reportan problemas de Engram.
 
+## Proveedor y ciclo de skills externas
+
+El ecosistema **no mantiene un catálogo curado propio** de skills externas. El proveedor principal es **AgentSkillExchange**:
+
+- Repositorio: <https://github.com/agentskillexchange/skills>
+- Índice: <https://raw.githubusercontent.com/agentskillexchange/skills/main/skills.json>
+
+El índice sirve para descubrir skills, mientras que la fuente upstream original declarada para cada skill se conserva como su origen de instalación. `skill-library`/PortalesCode no es una fuente operativa de skills externas; las referencias a PortalesCode en el README se limitan al repositorio del ecosistema.
+
+Al instalar una skill de terceros, se preserva todo su contenido en `.opencode/skills/extern/<slug>/`, se agrega `crisol-eco.yaml` y se añade el bloque `## Crisol-Eco: integración`. Las dependencias MCP/CLI no se instalan implícitamente: el usuario debe aprobarlas como tareas explícitas.
+
+Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor** instala; **Auditor** verifica.
+
 ---
 
 ## Próximos Pasos

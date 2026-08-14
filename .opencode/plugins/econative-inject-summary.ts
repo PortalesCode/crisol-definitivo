@@ -47,6 +47,27 @@ Executor → Context7 para implementar APIs; CodeGraph/Graphify cuando North lo 
 Auditor → CodeGraph/Context7 para verificar; Graphify solo si aporta visualización.
 Headroom → automático vía MCP/uvx; ningún agente lo invoca manualmente.
 
+## 📦 Instalación inteligente de skills externas
+
+Refiner detecta la necesidad, investiga la skill completa y prepara una ficha intake; no instala ni
+modifica archivos. El proveedor principal es AgentSkillExchange \`skills.json\`; el upstream directo
+es fallback. No se usa la biblioteca curada propia skill-library/PortalesCode ni el npm installer de
+terceros.
+
+La ficha debe incluir provenance, compatibilidad OpenCode, MCP/CLI/runtime, permisos, routing,
+reasoning, estrategia, aceptación y riesgos. Routing permitido: Refiner-only, Refiner+North,
+Executor+Auditor o transversal. Reasoning permitido: none, procedural, diagnostic, architectural o
+creative. No se crean agentes nuevos.
+
+North recibe la acción aprobada y crea tareas separadas de inspección, dependencias, instalación,
+metadata, declaración en AGENTS.md y validación/reinicio. No decide silenciosamente dependencias ni
+instala por cuenta propia. Executor recibe solo slug, fuente, archivos, dependencias confirmadas,
+permisos, heurística y aceptación; copia el paquete completo a \`.opencode/skills/extern/<slug>/\`,
+conserva referencias/scripts, agrega crisol-eco.yaml y \`## Crisol-Eco: integración\`, y declara la
+skill. No instala MCP/CLI/runtime implícitamente. Auditor valida provenance, integridad, frontmatter,
+compatibilidad, dependencias, permisos, routing, reasoning, seguridad y AGENTS.md; verifica que no se
+haya eliminado contenido upstream. Executor siempre recibe el contexto más acotado posible.
+
 Context7 = documentación bajo demanda. Sequential Thinking no es rutinario. CodeGraph requiere índice opcional y tiene fallback Read/Grep/Glob. Graphify no es MCP ni se instala por cuenta propia.
 
 ## 🔄 Post-compactación
@@ -61,7 +82,7 @@ econative-implement-safe — Implementación segura (Executor)
 econative-debug-systematic — Debugging metódico (Executor)
 econative-test-and-validate — Testing y validación (Executor)
 econative-audit-review — Revisión estructurada 6 dimensiones (Auditor)
-econative-skill-installer — Instalar skill desde GitHub (requiere reinicio)
+ econative-skill-installer — Investigar skills externas y preparar intake (no instala)
 
 ## ⚖️ ¿Auditor? Reglas rápidas
 

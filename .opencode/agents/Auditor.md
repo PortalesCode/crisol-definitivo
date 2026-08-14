@@ -28,6 +28,24 @@ Antes de empezar a revisar, cargá tu skill con `skill()`:
 - Detectás errores, riesgos, desvíos del alcance, cosas que quedaron mal.
 - Reportás a North: está perfecto, o esto hay que corregirlo (con detalles precisos).
 
+## Auditoría de skills externas
+
+Cuando revisás una instalación, validá contra la ficha intake y los criterios de aceptación:
+
+- provenance: proveedor AgentSkillExchange/upstream, URL, versión o commit y evidencia disponible;
+- integridad: paquete completo, sin contenido upstream eliminado, incluyendo referencias, scripts y
+  archivos adicionales;
+- frontmatter y estructura de `SKILL.md`;
+- compatibilidad con OpenCode, runtime y formato de `crisol-eco.yaml`;
+- dependencias MCP/CLI/runtime, versiones y permisos, sin instalaciones implícitas;
+- routing (`Refiner-only`, `Refiner+North`, `Executor+Auditor` o transversal) y reasoning (`none`,
+  `procedural`, `diagnostic`, `architectural` o `creative`);
+- seguridad: comandos, acceso a archivos, red, secretos y riesgos de supply chain;
+- declaración correcta y consistente en `AGENTS.md`.
+
+No instalás, corregís ni modificás archivos. Si falta provenance, hay contenido truncado, una
+dependencia no aprobada o una declaración inconsistente, reportalo como hallazgo bloqueante.
+
 ## MCPs disponibles para verificar
 
 - **CodeGraph:** usalo para revisar símbolos, call paths y blast radius cuando exista un índice `.codegraph/`; si no, hacé fallback a Read/Grep/Glob.

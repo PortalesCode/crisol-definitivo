@@ -36,6 +36,24 @@ Skills de terceros o custom del proyecto. Viven en `.opencode/skills/extern/<nom
 
 - _(sin skills externas instaladas)_
 
+#### Proveedor y ciclo de instalación
+
+- **Proveedor principal:** AgentSkillExchange, mediante su `skills.json`.
+- **Fallback:** upstream directo del proyecto de la skill, con provenance verificable.
+- La biblioteca curada propia `skill-library`/PortalesCode no es fuente operativa.
+- No se usa el npm installer de terceros como dependencia.
+- Refiner investiga el paquete completo y produce la ficha intake; no instala.
+- North crea tareas separadas de inspección, dependencias, instalación, metadata, declaración y
+  validación/reinicio; no decide silenciosamente dependencias ni instala por cuenta propia.
+- Executor copia el paquete completo, conserva referencias/scripts/archivos adicionales, agrega
+  `crisol-eco.yaml`, agrega `## Crisol-Eco: integración` y actualiza esta declaración.
+- Auditor verifica provenance, integridad, frontmatter, compatibilidad OpenCode, dependencias,
+  permisos, routing, reasoning, seguridad y que no se haya eliminado contenido upstream.
+
+Routing permitido: `refiner-only`, `refiner-north`, `executor-auditor` o `transversal`.
+Reasoning permitido: `none`, `procedural`, `diagnostic`, `architectural` o `creative`.
+No se crean agentes nuevos; Executor siempre recibe el contexto más acotado posible.
+
 ### Tools locales de conocimiento
 
 Las tools locales viven en `.opencode/tools/` y se cargan como parte del ecosistema:
@@ -52,7 +70,7 @@ La biblioteca de conocimiento y n8n son dependencias externas configurables: no 
 | Skill | Dueño | Propósito |
 |---|---|---|
 | `econative-architecture-review` | North | Evaluar arquitectura, componentes, límites, impacto, escalabilidad |
-| `econative-skill-installer` | Refiner | Instalar skills externas bajo demanda |
+| `econative-skill-installer` | Refiner | Investigar skills externas y preparar intake; no instala |
 | `econative-parallel-dispatch` | North | Detectar tareas independientes y lanzar Executors en paralelo |
 | `econative-implement-safe` | Executor | Implementación segura (reglas, rollback) |
 | `econative-debug-systematic` | Executor | Debugging metódico |
@@ -134,7 +152,7 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 | Skill | Dueño | Propósito |
 |---|---|---|
 | `econative-architecture-review` | North | Revisar arquitectura y detectar riesgos |
-| `econative-skill-installer` | Refiner | Instalar skills bajo demanda desde el repositorio remoto |
+| `econative-skill-installer` | Refiner | Investigar skills bajo demanda desde AgentSkillExchange/upstream y preparar intake |
 | `econative-parallel-dispatch` | North | Detectar independencia y lanzar ejecutores paralelos |
 | `econative-implement-safe` | Executor | Implementación segura (reglas de edición, rollback) |
 | `econative-debug-systematic` | Executor | Debugging metódico (6 pasos + antipatrones) |
@@ -151,6 +169,17 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 6. **North** es dueño operativo del ciclo completo: usa `econative_plan({ action: "design", intention, phases, tasks })` para descomponer la acción, marca `start` antes de cada trabajo, coordina **Executor/Auditor**, marca `close` al terminar cada tarea y usa `status` para revisar progreso.
 7. North usa `econative_plan_read` cuando necesita leer el plan completo y `econative_plan_archive` al cerrar un plan completo. Son helpers legítimos del mismo ciclo del plan, no sistemas alternativos ni duplicados: `econative_plan` sigue siendo la única tool de mutación/gestión operativa; `econative_plan_read` y `econative_plan_archive` completan el ciclo.
 8. North devuelve el resultado a Refiner, Refiner lo sintetiza al usuario
+
+### Routing y reasoning de skills externas
+
+Las skills externas se enrutan según su superficie: pueden ser `refiner-only`, `refiner-north`,
+`executor-auditor` o `transversal`. Cada intake declara además un reasoning: `none`, `procedural`,
+`diagnostic`, `architectural` o `creative`. El routing no crea agentes nuevos. North asigna a cada
+agente únicamente el contexto necesario, y Executor recibe siempre el bloque más acotado posible.
+
+Para instalar una skill, North debe mantener tareas explícitas y separadas de inspección, dependencias,
+instalación, metadata, declaración en `AGENTS.md` y validación/reinicio. Dependencias, permisos y
+herramientas externas solo se ejecutan si están confirmadas en la acción aprobada.
 
 ### Continuidad Refiner ↔ North
 

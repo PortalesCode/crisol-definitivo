@@ -1,0 +1,41 @@
+# Ejemplo NO INSTALABLE de metadata para una skill externa de Crisol-Eco.
+# Completar todos los valores con datos verificados antes de usarlo; nunca incluir secretos.
+schema_version: "1"
+identity:
+  slug: replace-with-verified-slug # completar antes de usar
+  name: replace-with-verified-name # completar antes de usar
+  source_url: https://replace-with-verified-source.example # completar antes de usar
+  source_revision: replace-with-verified-revision # completar antes de usar
+  retrieved_at: null # completar con la fecha real antes de usar
+  checksum: null # completar con un checksum verificado antes de usar
+compatibility:
+  frameworks: []
+  opencode: unknown
+  status: pending
+runtime:
+  host: unknown # opencode | multi-framework | unknown; completar antes de usar
+  discovery_path: replace-with-verified-discovery-path # completar antes de usar; no usar rutas personales
+  restart_required: false # completar con el valor verificado antes de usar
+dependencies:
+  mcp: []
+  cli: []
+  packages: []
+  environment: []
+  permissions: []
+routing:
+  profile: refiner-only # refiner-only | refiner-north | executor-auditor | transversal
+  agents: [] # solo: refiner, north, executor, auditor
+reasoning:
+  mode: none
+  required: false
+  triggers: []
+  method: Direct procedure; replace with the verified method.
+  output: Short implementation result.
+integration:
+  upstream_preserved: true
+  curated: false
+  heuristic_added: true
+verification:
+  source_reviewed: false
+  security_reviewed: false
+  frontmatter_valid: false
