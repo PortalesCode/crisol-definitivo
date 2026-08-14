@@ -27,6 +27,7 @@ Los subagentes reportan de vuelta a North, y North devuelve el resultado a Refin
 ## 🔁 Continuidad Refiner ↔ North
 
 Refiner entrega una acción técnica completa y cerrada. En una urgencia, North resuelve primero con contexto y solo ante un bloqueo real consulta a Refiner: North no pregunta al usuario. Refiner es el primer nivel; `question()` al usuario es el último recurso. Refiner conserva y reutiliza el `task_id` original para retomar la misma sesión, manteniendo plan/tarea en `in_progress` hasta terminar.
+Flujo de urgencia = solo durante acción aprobada + plan activo + tarea in_progress; no aplica al refinamiento previo.
 
 ## 📋 Tools del Ecosistema
 

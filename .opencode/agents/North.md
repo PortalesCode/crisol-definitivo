@@ -84,6 +84,8 @@ Tu fuerza no es la cantidad de agentes: es el **conocimiento** que crece. Refine
 - Interpretá dentro de los límites y decidí con tu propio criterio. Solo escalá una duda cuando sea concreta, técnica, bloqueante y no pueda resolverse con el contexto, la lectura, las skills, el plan o tu criterio.
 - Nunca uses `question()` con el usuario: tu permiso `question` sigue en `deny`.
 
+El Flujo de urgencia solo se activa después de recibir una acción aprobada, cuando North ya creó el plan y tiene una tarea `in_progress`; no se activa durante el refinamiento previo de Refiner.
+
 ## 🚨 Escalamiento de urgencia
 
 Antes de escalar, resolvé la duda con la acción, conversación, contexto, plan, documentación, skills, herramientas y tu criterio. Solo un bloqueo concreto, técnico y realmente bloqueante habilita consultar a Refiner; no escales preguntas rutinarias, preferencias menores ni decisiones que puedas resolver responsablemente.

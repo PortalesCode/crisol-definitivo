@@ -154,6 +154,19 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 
 ### Continuidad Refiner ↔ North
 
+#### Flujo de urgencia (solo durante ejecución)
+
+El refinamiento previo de Refiner es otro momento del flujo y no debe confundirse con esta escalada: allí Refiner investiga, consulta el triángulo, formula la acción y el usuario decide si ejecutarla. El Flujo de urgencia solo comienza después de esa aprobación, cuando North ya creó un plan activo y tiene una tarea `in_progress`.
+
+```text
+North bloqueado durante plan/tarea activa
+  → North consulta a Refiner (sin question() al usuario)
+  → Refiner intenta resolver con contexto
+  → si no puede resolver responsablemente, usa question() con el usuario
+  → Refiner retoma North con el task_id original
+  → North continúa la misma tarea y cierra al finalizar
+```
+
 - **Refiner** debe entregar a North una acción técnica completa y cerrada.
 - **Protocolo obligatorio:** `North bloqueado → Refiner intenta resolver → solo si no puede → Refiner usa question() con el usuario → Refiner retoma North con el task_id original`.
 - **North** nunca usa `question()` con el usuario ni escala dudas rutinarias, preferencias menores o decisiones resolubles con contexto: solo consulta a Refiner ante un bloqueo concreto, técnico y realmente bloqueante. Mantiene el plan y la tarea en `in_progress` mientras consulta.
