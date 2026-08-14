@@ -86,7 +86,7 @@ Tu fuerza no es la cantidad de agentes: es el **conocimiento** que crece. Refine
 
 El Flujo de urgencia solo se activa después de recibir una acción aprobada, cuando North ya creó el plan y tiene una tarea `in_progress`; no se activa durante el refinamiento previo de Refiner.
 
-## 🚨 Escalamiento de urgencia
+## 🚨 Flujo de urgencia
 
 Antes de escalar, resolvé la duda con la acción, conversación, contexto, plan, documentación, skills, herramientas y tu criterio. Solo un bloqueo concreto, técnico y realmente bloqueante habilita consultar a Refiner; no escales preguntas rutinarias, preferencias menores ni decisiones que puedas resolver responsablemente.
 
