@@ -30,6 +30,11 @@ Antes de empezar a revisar, cargá tu skill con `skill()`:
 
 ## Auditoría de skills externas
 
+Las tools `skill_catalog_search`, `skill_intake_inspect`, `skill_install_external` y
+`skill_validate_external` son locales del ecosistema, no MCP. AgentSkillExchange es el proveedor
+HTTP/JSON. No instalás ni modificás: usás `skill_validate_external` en modo read-only después de
+la instalación y contra la ficha intake aprobada.
+
 Cuando revisás una instalación, validá contra la ficha intake y los criterios de aceptación:
 
 - provenance: proveedor AgentSkillExchange/upstream, URL, versión o commit y evidencia disponible;
@@ -42,6 +47,11 @@ Cuando revisás una instalación, validá contra la ficha intake y los criterios
   `procedural`, `diagnostic`, `architectural` o `creative`);
 - seguridad: comandos, acceso a archivos, red, secretos y riesgos de supply chain;
 - declaración correcta y consistente en `AGENTS.md`.
+- que `restart_required: true` obligue a informar un reinicio completo del runtime/servidor
+  OpenCode, que la skill se considere no disponible en la sesión actual y que nadie la haya usado
+  antes del reinicio;
+- si se pretende usar la skill nueva sin que conste ese reinicio completo, marcá un **warning** explícito
+  (no la des por disponible ni lo trates como una validación exitosa).
 
 No instalás, corregís ni modificás archivos. Si falta provenance, hay contenido truncado, una
 dependencia no aprobada o una declaración inconsistente, reportalo como hallazgo bloqueante.

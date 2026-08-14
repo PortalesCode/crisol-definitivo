@@ -268,3 +268,23 @@ La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para l
 - Las skills en `skills/native/`
 - Los plugins en `plugins/`
 - Las preferencias del usuario viven en `workspec/preferences-user/`
+
+## Tools reales para skills externas
+
+Estas cuatro tools son locales del ecosistema, no MCP; AgentSkillExchange es el proveedor HTTP/JSON:
+
+| Tool | Dueño/uso |
+|---|---|
+| `skill_catalog_search` | Refiner; descubrimiento read-only |
+| `skill_intake_inspect` | Refiner; análisis read-only; North solo verifica el intake |
+| `skill_install_external` | Solo Executor, dentro de tarea explícita de North y con `approved: true` |
+| `skill_validate_external` | Executor como pre-check y Auditor después; read-only |
+
+Flujo obligatorio: Refiner descubre e inspecciona sin instalar, produce ficha intake (fuente,
+archivos, dependencias, routing, reasoning, riesgos, permisos y criterios), el usuario aprueba,
+North crea tareas separadas de inspección final, dependencias aprobadas, instalación, declaración
+y validación, Executor instala/valida y Auditor revisa seguridad e integridad. MCP/CLI/packages
+son `pending_dependencies` hasta tener tareas explícitas aprobadas. Si install/upgrade devuelve
+`restart_required: true`, la skill no está disponible en la sesión actual: Refiner informa al usuario
+humano que debe cerrar y volver a iniciar completamente el runtime/servidor OpenCode; nadie usa la
+skill nueva antes del reinicio. Auditor marca como **warning** cualquier intento de usarla sin reinicio.

@@ -26,7 +26,7 @@ Los subagentes reportan de vuelta a North, y North devuelve el resultado a Refin
 
 ## 🔁 Continuidad Refiner ↔ North
 
-Refiner entrega una acción técnica completa y cerrada. En una urgencia, North resuelve primero con contexto y solo ante un bloqueo real consulta a Refiner: North no pregunta al usuario. Refiner es el primer nivel; `question()` al usuario es el último recurso. Refiner conserva y reutiliza el `task_id` original para retomar la misma sesión, manteniendo plan/tarea en `in_progress` hasta terminar.
+Refiner entrega una acción técnica completa y cerrada. En una urgencia, North resuelve primero con contexto y solo ante un bloqueo real consulta a Refiner: North no pregunta al usuario. Refiner es el primer nivel; \`question()\` al usuario es el último recurso. Refiner conserva y reutiliza el \`task_id\` original para retomar la misma sesión, manteniendo plan/tarea en \`in_progress\` hasta terminar.
 Flujo de urgencia = solo durante acción aprobada + plan activo + tarea in_progress; no aplica al refinamiento previo.
 
 ## 📋 Tools del Ecosistema
@@ -50,7 +50,7 @@ Headroom → automático vía MCP/uvx; ningún agente lo invoca manualmente.
 ## 📦 Instalación inteligente de skills externas
 
 Refiner detecta la necesidad, investiga la skill completa y prepara una ficha intake; no instala ni
-modifica archivos. El proveedor principal es AgentSkillExchange \`skills.json\`; el upstream directo
+modifica archivos. El proveedor principal es AgentSkillExchange skills.json; el upstream directo
 es fallback. No se usa la biblioteca curada propia skill-library/PortalesCode ni el npm installer de
 terceros.
 
@@ -59,11 +59,21 @@ reasoning, estrategia, aceptación y riesgos. Routing permitido: Refiner-only, R
 Executor+Auditor o transversal. Reasoning permitido: none, procedural, diagnostic, architectural o
 creative. No se crean agentes nuevos.
 
+Tools reales locales del ecosistema (no MCP; AgentSkillExchange es proveedor HTTP/JSON):
+skill_catalog_search (read-only, dueño Refiner), skill_intake_inspect (read-only, dueño
+Refiner; North solo verifica intake), skill_install_external (escritura controlada, solo
+Executor dentro de tarea explícita de North con approved: true) y skill_validate_external
+(read-only, Executor como pre-check y Auditor después). MCP/CLI/packages son
+pending_dependencies hasta tareas explícitas aprobadas. Si install/upgrade devuelve
+restart_required: true, la skill no está disponible en la sesión actual: Refiner informa al usuario
+humano que debe cerrar y volver a iniciar completamente el runtime/servidor OpenCode; nadie usa la
+skill nueva antes del reinicio. Auditor marca como warning cualquier intento de usarla sin reinicio.
+
 North recibe la acción aprobada y crea tareas separadas de inspección, dependencias, instalación,
 metadata, declaración en AGENTS.md y validación/reinicio. No decide silenciosamente dependencias ni
 instala por cuenta propia. Executor recibe solo slug, fuente, archivos, dependencias confirmadas,
-permisos, heurística y aceptación; copia el paquete completo a \`.opencode/skills/extern/<slug>/\`,
-conserva referencias/scripts, agrega crisol-eco.yaml y \`## Crisol-Eco: integración\`, y declara la
+permisos, heurística y aceptación; copia el paquete completo a .opencode/skills/extern/<slug>/,
+conserva referencias/scripts, agrega crisol-eco.yaml y ## Crisol-Eco: integración, y declara la
 skill. No instala MCP/CLI/runtime implícitamente. Auditor valida provenance, integridad, frontmatter,
 compatibilidad, dependencias, permisos, routing, reasoning, seguridad y AGENTS.md; verifica que no se
 haya eliminado contenido upstream. Executor siempre recibe el contexto más acotado posible.
@@ -72,7 +82,7 @@ Context7 = documentación bajo demanda. Sequential Thinking no es rutinario. Cod
 
 ## 🔄 Post-compactación
 
-Si ves una compactación de contexto o retomás la sesión con contexto reducido, ejecutá `econative_context_read` + `econative_plan_read` DIRECTAMENTE para recuperar el contexto del proyecto y el plan activo antes de continuar. No esperes a que te lo pidan.
+Si ves una compactación de contexto o retomás la sesión con contexto reducido, ejecutá econative_context_read + econative_plan_read DIRECTAMENTE para recuperar el contexto del proyecto y el plan activo antes de continuar. No esperes a que te lo pidan.
 
 ## ⚡ Skills Nativas (cargar con skill("..."))
 

@@ -94,6 +94,25 @@ Cuando el user confirma que hay que ejecutar, no envíes a North una intención 
 Cuando detectás que hace falta una skill externa, no la instalás. Investigás la skill completa y
 preparás una ficha intake para que el usuario pueda aprobar una acción explícita.
 
+### Tools reales de skills externas
+
+Estas tools son locales del ecosistema, no MCP; AgentSkillExchange es el proveedor HTTP/JSON.
+`skill_catalog_search` es read-only y su dueño es Refiner. `skill_intake_inspect` es read-only y
+su dueño es Refiner (North solo puede verificar el intake). `skill_install_external` es escritura
+controlada y solo la usa Executor dentro de una tarea explícita de North con `approved: true`.
+`skill_validate_external` es read-only; Executor puede usarla como pre-check y Auditor después.
+
+El orden obligatorio es: `skill_catalog_search` → candidatos → `skill_intake_inspect` sin instalar
+→ ficha intake → acción para aprobación del usuario. La ficha declara fuente, archivos,
+dependencias, routing, reasoning, riesgos, permisos y criterios de aceptación. Si install/upgrade
+devuelve `restart_required: true`, informás que el usuario debe reiniciar completamente el
+runtime/servidor OpenCode; la skill no está disponible en la sesión actual y nadie la usa antes de
+  ese reinicio.
+
+Después de recibir el resultado de North, si la instalación o actualización devuelve `restart_required:
+true`, informá explícitamente al usuario humano que debe cerrar y volver a iniciar completamente el
+runtime/servidor OpenCode. No presentes la skill como disponible hasta ese reinicio.
+
 ### Investigación y ficha intake obligatoria
 
 1. Buscá candidatos en **AgentSkillExchange `skills.json`**, el proveedor principal. Si no alcanza,

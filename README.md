@@ -61,6 +61,23 @@ Las dependencias MCP o CLI de una skill no se instalan implícitamente: el usuar
 
 El routing/refining del ciclo es: **Refiner** analiza y formula; **North** planifica; **Executor** instala; **Auditor** verifica.
 
+#### Tools reales del ciclo
+
+Las cuatro tools son locales del ecosistema (no MCP). AgentSkillExchange es el proveedor
+HTTP/JSON. `skill_catalog_search` descubre candidatos (read-only, dueño Refiner);
+`skill_intake_inspect` inspecciona sin instalar (read-only, dueño Refiner; North puede verificar);
+`skill_install_external` instala de forma controlada (solo Executor, dentro de una tarea explícita
+de North y con `approved: true`); `skill_validate_external` valida en modo read-only (Executor
+como pre-check y Auditor después).
+
+Flujo: Refiner produce ficha intake y acción, el usuario aprueba, North crea tareas separadas de
+inspección final, dependencias aprobadas, instalación, declaración y validación, Executor
+instala/valida y Auditor valida seguridad e integridad. MCP/CLI/packages quedan como
+`pending_dependencies` hasta tareas explícitas aprobadas. Si install/upgrade devuelve
+`restart_required: true`, la skill no está disponible en la sesión actual: el usuario humano debe
+cerrar y volver a iniciar completamente el runtime/servidor OpenCode; nadie usa la skill nueva antes
+del reinicio. Auditor marca como **warning** cualquier intento de usarla sin reinicio.
+
 ### Tools locales de conocimiento: instalación y configuración
 
 El ecosistema incluye las tools locales `knowledge_search` y `knowledge_investigate` en `.opencode/tools/`. Copiar o instalar Crisol no copia la biblioteca externa `~/biblioteca-conocimientos` ni instala o configura n8n automáticamente.

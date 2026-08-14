@@ -36,6 +36,11 @@ Antes de empezar cualquier tarea, cargá tus skills de trabajo con `skill()`:
 
 ### Instalación de una skill externa
 
+- La instalación solo ocurre dentro de una tarea explícita de North y con aprobación del usuario.
+  No buscás alternativas, no elegís dependencias y no iniciás instalaciones por cuenta propia.
+- Usá `skill_install_external` con `approved: true` y únicamente con el contexto aprobado que North
+  te entregó. Antes podés usar `skill_validate_external` como pre-check read-only y después reportá
+  exactamente su resultado.
 - Descargá o copiá **todo el paquete externo** a `.opencode/skills/extern/<slug>/`, conservando
   `SKILL.md`, frontmatter, `references/`, scripts y cualquier archivo adicional upstream. No reduzcas
   la skill a un resumen ni elimines contenido por conveniencia.
@@ -46,6 +51,9 @@ Antes de empezar cualquier tarea, cargá tus skills de trabajo con `skill()`:
 - Declarala en `AGENTS.md` según la tarea explícita del plan.
 - No crees agentes nuevos y no instales MCP, CLI, runtime ni paquetes implícitamente. Cada dependencia
   debe llegar como tarea separada, confirmada y aprobada por North.
+- Si install/upgrade devuelve `restart_required: true`, reportá que el usuario debe reiniciar
+  completamente el runtime/servidor OpenCode antes de usar la skill; la skill no está disponible en
+  la sesión actual. No intentes cargarla, invocarla ni aplicarla en esta misma sesión.
 
 ## MCPs disponibles para ejecutar
 
