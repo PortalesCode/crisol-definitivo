@@ -21,6 +21,15 @@
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
       "enabled": true
+    },
+    "lfx-research": {
+      "type": "local",
+      "enabled": true,
+      "command": ["uvx", "--with", "mcp[cli]", "--with", "lfx", "--with", "python-dotenv", "--from", ".opencode/mcp/lfx-research", "lfx-research-mcp"],
+      "environment": {
+        "KNOWLEDGE_LIBRARY_HOME": ".opencode/knowledge-library",
+        "LFX_FLOW_PATH": ".opencode/mcp/lfx-research/flows/investigacion-conocimiento.json"
+      }
     }
   }
 }
