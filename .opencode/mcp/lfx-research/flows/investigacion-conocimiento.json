@@ -1,0 +1,32 @@
+{
+  "description": "Placeholder Langflow flow for lfx-research MCP — replaced with real flow once OpenAI-compatible API is configured. Validated by `lfx run --stateless` as a minimal graph.",
+  "name": "investigacion-conocimiento (placeholder)",
+  "nodes": [],
+  "edges": [],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "metadata": {
+    "status": "placeholder",
+    "note": "This file is a stub so that LFX_FLOW_PATH resolves and `lfx run` validation does not fail before the real flow is wired. Replace with the exported Langflow JSON (Research + Auditor nodes, OpenAI-compatible models, stateless run).",
+    "expected_nodes": [
+      "ChatInput (topic, domain)",
+      "Prompt — research",
+      "OpenAI-compatible LLM (LFX_RESEARCH_MODEL)",
+      "Prompt — auditor/normalize",
+      "OpenAI-compatible LLM (LFX_AUDITOR_MODEL)",
+      "File write: .opencode/knowledge-library/<domain>/<slug>.md",
+      "Index update: .opencode/knowledge-library/index.json"
+    ],
+    "env": {
+      "OPENAI_API_KEY": "from .env",
+      "OPENAI_BASE_URL": "from .env",
+      "LFX_RESEARCH_MODEL": "from .env",
+      "LFX_AUDITOR_MODEL": "from .env",
+      "KNOWLEDGE_LIBRARY_HOME": ".opencode/knowledge-library",
+      "LFX_STATELESS": "true"
+    }
+  }
+}

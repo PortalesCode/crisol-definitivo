@@ -13,6 +13,9 @@ graphify-out/
 # Planes archivados (no viajan con el ecosistema)
 workspec/plans/old/
 
+# lfx-research MCP — secrets (also ignored inside .opencode/.gitignore)
+.opencode/mcp/lfx-research/.env
+
 # Sistema
 .DS_Store
 Thumbs.db

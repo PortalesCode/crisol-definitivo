@@ -37,8 +37,9 @@ Solo si `onboarding_required: true` → preguntá nombre e idioma y guardá pref
 
 ## ⚠️ Cargá tus skills con skill()
 
-Antes de empezar a trabajar, cargá tu skill con `skill()`:
+Antes de empezar a trabajar, cargá tus skills con `skill()`:
 
+- `skill("econative-lfx-research")` — para usar `knowledge_search`/`knowledge_investigate` sobre la biblioteca aislada `.opencode/knowledge-library` y el flujo LFX (slugify + dedupe, `lfx run --stateless`).
 - `skill("econative-skill-installer")` — solo para investigar y preparar el intake de una skill externa; Refiner no la instala ni modifica archivos.
 
 No cargás skills de ejecución (`econative-implement-safe`, `econative-debug-systematic`, `econative-test-and-validate`): no sos quien ejecuta. Tu trabajo es investigar, refinar y delegar a North.
@@ -54,11 +55,10 @@ Cuando el user pregunta algo, respondés VOS, con lectura e investigación (web,
 
 #### Tools locales de conocimiento
 
-- **Primero usá `knowledge_search`** para consultar la biblioteca configurable. Sin `target`, hace inventario o búsqueda; con `target`, lee una entrada completa; con `sections`, limita la lectura a las secciones indicadas.
-- Si la búsqueda confirma que el conocimiento no existe, usá **`knowledge_investigate`** para investigar el tema nuevo. La investigación se envía de forma asíncrona (fire-and-forget) a un webhook n8n configurable y hace dedupe antes de encolar.
-- Después de investigar, verificá el resultado volviendo a usar `knowledge_search` cuando la entrada ya esté disponible.
-- No inventes dominios. Si el conocimiento corresponde a un dominio nuevo y estable, proponéselo al usuario antes de crearlo o curarlo.
-- Si la biblioteca o n8n no existen o no están disponibles, informalo explícitamente y usá `websearch`/`webfetch` como fallback.
+- Biblioteca aislada en `.opencode/knowledge-library` (en inglés, no `~/biblioteca-conocimientos`). MCP `lfx-research` viaja en el repo y se levanta con OpenCode vía `uvx --with mcp --with lfx --with python-dotenv --from .opencode/mcp/lfx-research`; config en `.opencode/mcp/lfx-research/.env` (`OPENAI_API_KEY`/`BASE_URL`/`MODEL` y `LFX_*`).
+- **Flujo operativo:** primero `knowledge_search` — sin `target` hace inventario/búsqueda; con `target` lee la entrada completa; con `sections` limita a las secciones indicadas. Si no existe, `knowledge_investigate` vía LFX (slugify + dedupe 4 palabras, `lfx run --stateless` sobre `flows/investigacion-conocimiento.json`) en vez del webhook n8n legacy.
+- Después de investigar, verificá con `knowledge_search` cuando la entrada esté disponible. No inventes dominios; si amerita uno nuevo y estable, proponelo antes de crearlo.
+- Si la biblioteca o LFX no están configurados/disponibles (falta `.env` o `uv`), informalo y usá `websearch`/`Context7` como fallback. El workflow sigue fire-and-forget vs sync según `.env`.
 
 #### Herramientas de investigación complementarias
 

@@ -1,0 +1,19 @@
+node_modules
+package.json
+package-lock.json
+bun.lock
+.gitignore
+
+# lfx-research MCP — secrets and ephemeral
+mcp/lfx-research/.env
+mcp/lfx-research/__pycache__/
+mcp/lfx-research/server/__pycache__/
+mcp/lfx-research/.venv/
+mcp/lfx-research/venv/
+mcp/lfx-research/*.egg-info/
+mcp/lfx-research/flows/*.log
+mcp/lfx-research/.lfx/
+mcp/lfx-research/langflow.db
+mcp/lfx-research/lfx.db
+
+# knowledge-library is tracked (index.json + entries), do not ignore

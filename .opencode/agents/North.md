@@ -83,6 +83,7 @@ runtime/servidor OpenCode; nadie usa la skill instalada en el runtime actual.
 - **Graphify** — tratálo como una herramienta opcional de grafo y visualización del proyecto, no como un MCP. Usalo solo si está instalado/disponible y la tarea realmente necesita grafo. No lo instales por cuenta propia.
 - **Headroom** — es el MCP de optimización de contexto y opera vía `uvx`. No lo invoques ni configures manualmente salvo que el flujo lo requiera; reportá si falta `uv`.
 - **Context7** — usalo solo si necesitás confirmar una dependencia, API o versión para decidir la estrategia.
+- **lfx-research** — MCP portable para `knowledge_search`/`knowledge_investigate` sobre la biblioteca aislada `.opencode/knowledge-library` (no `~/biblioteca-conocimientos`). Se levanta con OpenCode vía `uvx --with mcp --with lfx --with python-dotenv --from .opencode/mcp/lfx-research` (`lfx run --stateless`); config OpenAI-compatible en `.opencode/mcp/lfx-research/.env` (`OPENAI_API_KEY`/`BASE_URL`/`MODEL`, `LFX_*`). Viaja en el repo, sin instalación global; reportá si falta `uv` o `.env`.
 
 Estas herramientas complementan el razonamiento, pero no reemplazan la lectura ni tu criterio para decidir la estrategia.
 
