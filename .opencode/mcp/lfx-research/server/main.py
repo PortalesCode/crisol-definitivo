@@ -260,10 +260,11 @@ def knowledge_search(
     if not terms:
         shown = hits[:MAX_INVENTORY]
         lines = [f'{i+1}. **{e["topic_key"]}** — {e.get("title","(no title)")} [{e.get("status","")}]' for i, e in enumerate(shown)]
+        domain_part = f' in domain "{domain_filter}"' if domain_filter else ""
         note = (
             f"\n\nShowing {len(shown)} of {len(hits)} entries. Filter with query or domain, or use target: \"<topic_key>\" to read one."
             if len(hits) > len(shown)
-            else f"\n\nTotal: {len(hits)} entries{ f' in domain \"{domain_filter}\"' if domain_filter else ''}. Use target: \"<topic_key>\" to read one."
+            else f"\n\nTotal: {len(hits)} entries{domain_part}. Use target: \"<topic_key>\" to read one."
         )
         return "\n".join(lines) + note
 
