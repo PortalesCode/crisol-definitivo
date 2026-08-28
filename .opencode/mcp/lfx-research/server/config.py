@@ -18,14 +18,35 @@ from dotenv import dotenv_values
 
 
 def _find_repo_root(start: Path) -> Path:
-    """Walk up until we find .git or opencode.json; fallback to start."""
+    """Walk up until we find .git or opencode.json; fallback to start.
+
+    Handles uvx --from cache: when _MCP_ROOT is inside .cache/uv, prefer CWD
+    which is the project root when OpenCode launches the MCP.
+    """
+    # Priority 1: CWD — when launched via uvx --from, start is in cache
+    try:
+        cwd = Path.cwd()
+        for parent in [cwd, *cwd.parents]:
+            if (parent / "opencode.json").exists() or (parent / ".git").exists():
+                return parent
+        # also handle being inside .opencode/mcp/lfx-research/server from cwd
+        if (cwd / "crisoles" / "crisol-definitive" / "opencode.json").exists():
+            return cwd / "crisoles" / "crisol-definitive"
+    except Exception:
+        pass
+    # Fallback: walk up from start (original logic)
     cur = start.resolve()
     for parent in [cur, *cur.parents]:
         if (parent / ".git").exists() or (parent / "opencode.json").exists():
             return parent
-        # also handle being inside .opencode/mcp/lfx-research/server
         if (parent / "crisoles" / "crisol-definitive" / "opencode.json").exists():
             return parent / "crisoles" / "crisol-definitive"
+    # Last resort: if start is inside uv cache, return cwd
+    if ".cache/uv" in str(cur) or "uv/archive" in str(cur):
+        try:
+            return Path.cwd().resolve()
+        except Exception:
+            pass
     return start.resolve()
 
 
@@ -33,11 +54,15 @@ def _find_repo_root(start: Path) -> Path:
 _THIS = Path(__file__).resolve()
 _SERVER_DIR = _THIS.parent
 _MCP_ROOT = _SERVER_DIR.parent  # .opencode/mcp/lfx-research
-# Try to locate repo root: first assume we are inside crisoles/crisol-definitive
+# Try to locate repo root: handles uvx --from cache via CWD fallback
 _REPO_ROOT = _find_repo_root(_MCP_ROOT)
 
-# Candidate .env location (gitignored)
+# Candidate .env location (gitignored) — fallback to repo-local .env when in uv cache
 _DOTENV_PATH = _MCP_ROOT / ".env"
+if not _DOTENV_PATH.exists() and ".cache/uv" in str(_MCP_ROOT):
+    _fallback_dotenv = _REPO_ROOT / ".opencode" / "mcp" / "lfx-research" / ".env"
+    if _fallback_dotenv.exists():
+        _DOTENV_PATH = _fallback_dotenv
 
 # Also try to read opencode.json env as middle priority
 _OPENCODE_JSON = _REPO_ROOT / "opencode.json"
