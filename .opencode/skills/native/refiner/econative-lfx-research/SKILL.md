@@ -97,13 +97,14 @@ LFX_AUDITOR_MODEL=gpt-4o
 | Together | `https://api.together.xyz/v1` |  |
 | Fireworks | `https://api.fireworks.ai/inference/v1` |  |
 | Perplexity | `https://api.perplexity.ai` | omit `/v1` |
+| **DeepSeek** | `https://api.deepseek.com` | OpenAI-compatible directo, modelos `deepseek-chat`, `deepseek-reasoner` |
 | **OpenCode Zen** | `https://opencode.ai/zen/v1` | pay-as-you-go, key en https://opencode.ai/zen, `GET /v1/models`, modelos ej `deepseek-v4-flash`, `qwen3.6-plus` |
 | **OpenCode Go** | `https://opencode.ai/zen/go/v1` | flat $10/mo, misma key Zen/Go, endpoint siempre `+ /chat/completions` |
 | Ollama local | `http://localhost:11434/v1` | sin key, `OPENAI_MODEL=llama3`, `gpt-oss-20b` etc |
 | LMStudio | `http://localhost:1234/v1` | sin key |
 | vLLM / TGI / custom | `http://localhost:8000/v1` | self-hosted OpenAI-compatible |
 
-Los mismos `OPENAI_*` los consumen Refiner y los nodos LLM del flow Langflow (`{{env.OPENAI_*}}`). `LFX_RESEARCH_MODEL`/`LFX_AUDITOR_MODEL` sobreescriben por nodo. Para **Claude** usá OpenRouter `anthropic/claude-3.5-sonnet` vía este mismo `OPENAI_BASE_URL` (bundle nativo Anthropic en Langflow solo si lo necesitás separado). Tras editar `.env`, reiniciar OpenCode.
+Los mismos `OPENAI_*` los consumen Refiner y los nodos LLM del flow Langflow (`{{env.OPENAI_*}}`). `LFX_RESEARCH_MODEL`/`LFX_AUDITOR_MODEL` sobreescriben por nodo. Para **Claude** hay dos vías: 1) OpenAI-compatible vía OpenRouter `anthropic/claude-3.5-sonnet` con este `OPENAI_BASE_URL` (recomendado, queda dentro del estándar), 2) **Claude directo** `https://api.anthropic.com` + `x-api-key` es **NO** OpenAI-compatible — requiere bundle nativo Anthropic en Langflow (no usa `OPENAI_*`). Para **DeepSeek directo** sí es OpenAI-compatible (`https://api.deepseek.com`, `deepseek-chat`). Tras editar `.env`, reiniciar OpenCode.
 
 ```bash
 bash .opencode/mcp/lfx-research/scripts/validate.sh
