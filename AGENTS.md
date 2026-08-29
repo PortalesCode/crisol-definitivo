@@ -130,6 +130,7 @@ Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutin
 | `Realistic` | subagent | Realista. Baja a tierra, valida, puntúa 1-10. Lo consulta Refiner. |
 | `Executor` | subagent | La mano de North. Ejecuta. |
 | `Auditor` | subagent | Verifica que lo ejecutado esté perfecto. |
+| `Patcheador` | subagent | Vía rápida de Refiner para lo trivial (<10 líneas, 1 archivo). No pasa por North/Executor/Auditor. Loguea en `workspec/context/PATCH-RAPIDO.md` vía `econative_patch_rapido`. |
 
 ### Filosofía
 
@@ -242,6 +243,7 @@ North decide según estas reglas:
 | `econative_plan_archive` | Helper legítimo del mismo ciclo: archiva un plan completado a `workspec/plans/old/` con timestamp; no es un sistema alternativo ni duplicado. |
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
+| `econative_patch_rapido` | Registra patch rápido en `workspec/context/PATCH-RAPIDO.md` con fecha/hora, cambio, por qué y por qué fue trivial. Lo usa solo Patcheador. |
 
 La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para las tools locales de conocimiento. Estas tools y sus dependencias externas no deben confundirse con los plugins del ecosistema.
 
@@ -260,6 +262,7 @@ La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para l
 - `workspec/context/ARCHITECTURE.md` — arquitectura del proyecto anfitrión
 - `workspec/context/CONVENTIONS.md` — reglas del repo anfitrión
 - `workspec/context/STATUS.md` — estado del TRABAJO del proyecto anfitrión
+- `workspec/context/PATCH-RAPIDO.md` — log de patches rápidos de Patcheador (Refiner le da significado incluso a lo trivial)
 - `workspec/context/STATUS-AGENTES.md` — referencia viva del ecosistema dev (rondas, decisiones, issues CD-x). NO es el estado del anfitrión.
 
 ## Notas
