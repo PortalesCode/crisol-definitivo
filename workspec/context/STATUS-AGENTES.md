@@ -9,7 +9,7 @@
 🔴 Sin definir     🟡 En construcción     🟢 Estable
 ```
 
-**Estado actual:** 🟢 Estable — estructura limpia y coherente post-ronda 5 (eliminación de lfx-research, desconexión de la biblioteca de conocimiento)
+**Estado actual:** 🟢 Estable — estructura limpia y coherente post-ronda 6 (túnel de investigación CD-7 implementado)
 
 ---
 
@@ -19,7 +19,10 @@
 |---|---|
 | **Fecha** | 2026-09-08 |
 | **Qué pasó** | Ronda 5: eliminación del MCP lfx-research y toda conexión con la biblioteca de conocimiento del ecosistema. Borrados `.opencode/mcp/lfx-research/`, `.opencode/knowledge-library/` y la skill `econative-lfx-research`. Limpiadas todas las referencias en AGENTS.md, Refiner.md, North.md, README.md, opencode.json, econative-inject-summary.ts y .gitignores. Refiner ahora investiga con websearch/webfetch/Context7 directo (sin biblioteca ni fallback). Decisión del usuario: el futuro motor de investigación será OpenCode puro con subagentes no bloqueantes (`opencode run`), no Langflow/LFX. |
+| **Fecha** | 2026-09-08 (2a sesión) |
+| **Qué pasó** | Ronda 6: implementación del motor de investigación CD-7 (túnel sellado). Creados 3 agentes ocultos (tunel-investigador primary, tunel-investigador-web, tunel-validador), plugin econative-conocimiento.ts con 3 tools (econative_investigar no bloqueante vía opencode run, econative_conocimiento_buscar barato, econative_conocimiento_leer), biblioteca movida a workspec/knowledge-library/. Agregados MCPs chrome-devtools y playwright al opencode.json (6 totales). langflow eliminado de la config global. Auditoría PASS. |
 | **Decisiones** | Ver sección "Decisiones" abajo |
+
 
 ---
 
@@ -38,7 +41,11 @@
 11. **Matriz operativa de MCPs/tools**: ✅ PUBLICADA — uso de CodeGraph, Context7, Sequential Thinking, Headroom y Graphify por agente (commit f3872129).
 12. **Separación STATUS.md / STATUS-AGENTES.md**: ✅ HECHA — STATUS.md documenta el proyecto anfitrión; STATUS-AGENTES.md es referencia viva del ecosistema dev.
 13. **Engram**: ✅ DECISIÓN — NO se forkeará por ahora. Se mantiene el criterio de instalación condicional (install.sh lo agrega a opencode.json local solo si no está en config global). No se reportan problemas de Engram.
-14. **lfx-research / biblioteca de conocimiento**: ✅ ELIMINADOS — el MCP `lfx-research` (Langflow/LFX), la biblioteca aislada `.opencode/knowledge-library` y la skill `econative-lfx-research` fueron borrados del árbol (queda en git history). Cero conexión con `~/biblioteca-conocimientos` ni n8n. Refiner investiga directo con `websearch`/`webfetch`/`Context7`. El futuro motor de investigación se decide en la siguiente ronda: **OpenCode puro + subagentes no bloqueantes con `opencode run`** (propuesta del usuario, pendiente de diseño).
+14. **lfx-research / biblioteca de conocimiento**: ✅ ELIMINADOS — el MCP `lfx-research` (Langflow/LFX), la biblioteca aislada (`.opencode/knowledge-library`, hoy en `workspec/knowledge-library/`) y la skill `econative-lfx-research` fueron borrados del árbol (queda en git history). Cero conexión con `~/biblioteca-conocimientos` ni n8n. Refiner investiga directo con `websearch`/`webfetch`/`Context7`. El futuro motor de investigación se decide en la siguiente ronda: **OpenCode puro + subagentes no bloqueantes con `opencode run`** (propuesta del usuario, pendiente de diseño).
+15. **Túnel de investigación CD-7**: ✅ IMPLEMENTADO — motor OpenCode puro (sin Langflow/LFX): tool `econative_investigar` hace spawn no bloqueante de `opencode run --agent tunel-investigador` desde la raíz del repo (cwd=context.directory), con OPENCODE_SUBAGENT=1 (guard anti-recursión) y detached/unref. 3 agentes ocultos: tunel-investigador (orquestador, primary), tunel-investigador-web (investiga crudo), tunel-validador (QA con score/verdict/feedback, verifica URLs). Regla de oro: NUNCA task() a agentes del túnel — solo tools. Auditoría PASS.
+16. **Biblioteca de conocimiento**: ✅ MOVIDA a `workspec/knowledge-library/` (era `.opencode/knowledge-library/`) — el conocimiento es del proyecto anfitrión, no del ecosistema. index.json (metadata barata: title + descripcion_corta) + template.md (formato estándar: ## metadata, #### secciones, ## Fuentes). Cero conexión con ~/biblioteca-conocimientos.
+17. **MCPs del definitive**: ✅ 6 totales — sequential-thinking, codegraph, headroom, context7 + chrome-devtools + playwright (nuevos, los usa tunel-investigador-web para contenido dinámico). langflow ELIMINADO de la config global de OpenCode.
+
 
 ## Proveedor y ciclo de skills externas
 
@@ -57,7 +64,7 @@ Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor
 
 ## Próximos Pasos
 
-- [ ] Diseñar el nuevo motor de investigación: OpenCode puro + subagente Investigador no bloqueante (`opencode run` desde el directorio actual, sin Langflow/LFX)
+- [ ] Probar el túnel de investigación en runtime con una investigación real (CD-7 implementado, falta prueba E2E)
 - [ ] Pulir skill autoinstalable
 - [ ] Script start/stop del server de OpenCode
 - [ ] Decidir bootstrap curl|bash
@@ -72,4 +79,4 @@ Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor
 | CD-4 | Skill autoinstalable sin pulir | Abierto | Media |
 | CD-5 | Script start/stop del server sin crear | Abierto | Media |
 | CD-6 | Decisión de bootstrap curl|bash pendiente | Abierto | Baja |
-| CD-7 | Motor de investigación a reemplazar: lfx-research eliminado, falta diseñar subagente Investigador (`opencode run` no bloqueante) | Abierto | Alta |
+| CD-7 | Motor de investigación: ✅ IMPLEMENTADO (túnel sellado) — pendiente prueba E2E en runtime | Abierto (prueba) | Alta |

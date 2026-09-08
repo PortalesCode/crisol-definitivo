@@ -91,14 +91,27 @@ del reinicio. Auditor marca como **warning** cualquier intento de usarla sin rei
 
 ## MCPs incluidos
 
-Los 4 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
+Los 6 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
 
 | MCP | Tipo | Qué hace |
 |---|---|---|
 | `sequential-thinking` | local (npx) | Razonamiento estructurado multi-paso para tareas complejas |
-| `codegraph` | local (npx) | Grafo de conocimiento del código: símbolos, edges, blast radius |
-| `headroom` | local (uvx) | Optimización de contexto LLM: recupera conocimiento relevante (requiere `uv`) |
+| `codegraph` | local (npx) | Grafo de conocimiento del código: símbolos, edges, blast radius (`@colbymchenry/codegraph@1.5.0`) |
+| `headroom` | local (uvx) | Optimización de contexto LLM: recupera conocimiento relevante (requiere `uv`; `headroom-ai[mcp]`) |
 | `context7` | remoto | Documentación de librerías bajo demanda |
+| `chrome-devtools` | local (npx) | Control de Chrome DevTools: navegación, snapshots, screenshots, red y consola (`chrome-devtools-mcp@latest`) |
+| `playwright` | local (npx) | Automatización de navegador end-to-end: testear y validar UIs en el navegador real (`@playwright/mcp`) |
+
+## Túnel de conocimiento
+
+El ecosistema trae un **túnel de investigación sellado**: agentes ocultos que investigan y dejan conocimiento indexado, sin interferir con el ciclo visible (Refiner/North/Executor/Auditor).
+
+- **3 tools visibles** (plugin `econative-conocimiento.ts`):
+  - `econative_investigar` — lanza una investigación **no bloqueante**: dispara `opencode run --agent tunel-investigador "misión"` en background desde la raíz del repo y devuelve apenas arrancó.
+  - `econative_conocimiento_buscar` — busca en el índice (barato, solo metadata/resúmenes).
+  - `econative_conocimiento_leer` — lee el contenido completo de un entry.
+- **Biblioteca:** `workspec/knowledge-library/` — `index.json` + entries en formato estándar (`template.md`: descripción corta, resumen ejecutivo, secciones, fuentes).
+- **Regla de sellado:** el túnel es sellado — nadie del ecosistema visible llama `task()` a los agentes ocultos (`tunel-investigador`, `tunel-investigador-web`, `tunel-validador`). La única puerta es la tool `econative_investigar`.
 
 ## Plugins incluidos
 
@@ -125,12 +138,13 @@ constante_crear({ titulo: "No tocar servidores", detalle: "No ejecutar comandos 
 ```
 crisol-definitive/
 ├── .opencode/
-│   ├── agents/       # Refiner, North, Boehmio, Realistic, Executor, Auditor
+│   ├── agents/       # Refiner, North, Boehmio, Realistic, Executor, Auditor + agentes ocultos del túnel (tunel-*)
 │   ├── skills/       # Skills nativas por dueño (north/, executor/, auditor/, refiner/)
 │   ├── tools/        # Tools locales del ecosistema
-│   └── plugins/      # Tools del ecosistema (econative_*)
+│   ├── plugins/      # Tools del ecosistema (econative_*)
 ├── Agents-engram-memory/ # Protocolo engram (se mergea al AGENTS.md global)
 ├── workspec/
+│   ├── knowledge-library/ # Biblioteca del túnel de conocimiento (index.json + entries)
 │   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS, STATUS-AGENTES
 │   ├── plans/        # Plan activo y archivados
 │   ├── preferences-user/ # Preferencias del usuario (nombre, idioma)
@@ -150,7 +164,7 @@ crisol-definitive/
 ### Engram (memoria persistente global)
 
 - **Engram** es una herramienta de **memoria persistente global** (binario Go standalone, repo `Gentleman-Programming/engram`) útil para **cualquier agente MCP**, no solo este ecosistema. Guarda decisiones, bugs y descubrimientos (SQLite + FTS5) entre sesiones. Se instala globalmente (no en el repo), igual que `uv`/`graphify` — solo `engram`, sin `gentle-ai`.
-- **El MCP `engram` NO viaja hardcodeado en el `opencode.json` del paquete** (viaja limpio: solo `sequential-thinking`, `codegraph`, `headroom` y `context7`). El `install.sh` decide con `setup_engram_mcp()`:
+- **El MCP `engram` NO viaja hardcodeado en el `opencode.json` del paquete** (viaja limpio: solo `sequential-thinking`, `codegraph`, `headroom`, `context7`, `chrome-devtools` y `playwright`). El `install.sh` decide con `setup_engram_mcp()`:
   - Si ya tenés el MCP `engram` en tu config **GLOBAL** de OpenCode (`~/.config/opencode/opencode.json` o `.jsonc`) → no toca nada (el global alcanza a todos los proyectos locales).
   - Si NO lo tenés en global → lo agrega al `opencode.json` **local** del proyecto destino, con **backup `.bak`** antes de escribir y **verificación post-escritura** (JSON válido + contiene `engram`, con rollback desde el backup si falla). Así el MCP queda disponible sin arriesgar tu config global.
 - El instalador la propone como **Paso 6/6** (opcional, no bloqueante): detecta si ya está instalada, la instala si falta (o pregunta) y mergea su protocolo al `AGENTS.md` global de OpenCode (`~/.config/opencode/AGENTS.md`) con un merge sano por marcadores (`ENGRAM-MEMORY-START`). Solo llama a `setup_engram_mcp` (MCP local) cuando el binario `engram` quedó disponible.

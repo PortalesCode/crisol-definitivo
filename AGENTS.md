@@ -74,6 +74,8 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 - `codegraph` — grafo de conocimiento del código (símbolos, edges, blast radius); portable vía `npx`, sin instalación global
 - `headroom` — optimización de contexto LLM (recupera conocimiento relevante); portable vía `uvx`, requiere `uv`
 - `context7` — documentación de librerías bajo demanda (remoto)
+- `chrome-devtools` — navegación, snapshots, screenshots, red y consola del navegador; portable vía `npx`
+- `playwright` — automatización E2E de navegador; portable vía `npx`
 
 > **codegraph** se ejecuta vía `npx -y @colbymchenry/codegraph` (portable, el runtime lo levanta sin instalación global — mismo patrón que `sequential-thinking`). El paquete npm `codegraph` sin scope NO es el real; el real es `@colbymchenry/codegraph@1.5.0`. Usa un índice `.codegraph/` opcional por proyecto, creado con `codegraph init`; sin índice, el agente usa sus tools nativas (Read/Grep/Glob) — no bloquea nada.
 
@@ -101,7 +103,7 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 
 Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutina. CodeGraph requiere un índice `.codegraph/` opcional y tiene fallback Read/Grep/Glob. Graphify no es MCP y los agentes no lo instalan por cuenta propia.
 
-> **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 4 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
+> **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 6 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
 
 ### Links
 
@@ -120,6 +122,11 @@ Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutin
 | `Executor` | subagent | La mano de North. Ejecuta. |
 | `Auditor` | subagent | Verifica que lo ejecutado esté perfecto. |
 | `Patcheador` | subagent | Vía rápida de Refiner para lo trivial (<10 líneas, 1 archivo). No pasa por North/Executor/Auditor. Loguea en `workspec/context/PATCH-RAPIDO.md` vía `econative_patch_rapido`. |
+| `tunel-investigador` | primary (oculto) | Orquestador del túnel. Lo lanza SOLO la tool `econative_investigar` vía `opencode run`. Delega a los subagentes del túnel, consolida e indexa el conocimiento. NO se invoca con task(). |
+| `tunel-investigador-web` | subagent (oculto) | Investiga crudo en la web (websearch/webfetch/playwright/chrome-devtools). Solo lo llama tunel-investigador. |
+| `tunel-validador` | subagent (oculto) | Control de calidad: valida estructura y fuentes, devuelve {score, verdict, feedback}. Solo lo llama tunel-investigador. |
+
+> **Agentes ocultos del túnel:** los tres agentes `tunel-*` son un subsistema sellado y **NO se invocan con `task()` desde el ecosistema visible**. La única puerta de entrada es la tool `econative_investigar`, que los lanza vía `opencode run --agent tunel-investigador` (ver sección «## Túnel de conocimiento»).
 
 ### Filosofía
 
@@ -132,6 +139,22 @@ Auditor = control
 Context = estado del proyecto
 Preferencias = configuración del usuario (nombre, idioma)
 ```
+
+## Túnel de conocimiento
+
+- **Qué es:** túnel sellado de investigación OpenCode puro. La tool `econative_investigar` lanza `opencode run --agent tunel-investigador` en background (**NO BLOQUEANTE**) desde la **RAÍZ del repo** (donde vive `.opencode/`). El `tunel-investigador` orquesta los subagentes del túnel (web + validador), consolida, escribe el `.md` e indexa.
+- **Regla de oro:** NUNCA llamar `task()` a los agentes del túnel desde el ecosistema visible. La única puerta son las tools.
+- **Tools del ecosistema visible:**
+
+  | Tool | Qué hace | Costo |
+  |---|---|---|
+  | `econative_investigar` | Lanza investigación no bloqueante (ticket inmediato) | 1 spawn background |
+  | `econative_conocimiento_buscar` | Index barato: lista título + descripción corta | Baratísimo (sin contenido) |
+  | `econative_conocimiento_leer` | Lee el `.md` completo de un entry (key `domain/slug`) | Solo cuando hace falta |
+
+- **Biblioteca:** `workspec/knowledge-library/` del repo — `index.json` (metadata barata) + `<domain>/<slug>.md` (formato estándar: `# título`, `## Descripción corta`, `## Resumen ejecutivo`, `#### secciones`, `## Fuentes`). NUNCA `~/biblioteca-conocimientos`.
+- **Guard anti-recursión:** el proceso lanzado lleva `OPENCODE_SUBAGENT=1`; `tunel-investigador` no relanza `opencode run`.
+- **Uso sugerido:** buscar primero (barato) → si no está, investigar (async) → leer cuando se necesite.
 
 ## Skills disponibles
 
@@ -233,6 +256,9 @@ North decide según estas reglas:
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
 | `econative_patch_rapido` | Registra patch rápido en `workspec/context/PATCH-RAPIDO.md` con fecha/hora, cambio, por qué y por qué fue trivial. Lo usa solo Patcheador. |
+| `econative_investigar` | Lanza el túnel de investigación (no bloqueante). Dueño: Refiner. |
+| `econative_conocimiento_buscar` | Búsqueda barata en el index de conocimiento (título + descripción). Dueño: Refiner/North. |
+| `econative_conocimiento_leer` | Lee el entry completo de conocimiento. Dueño: Refiner/North. |
 
 > **Constantes de laburo:** las constantes ACTIVAS se inyectan en el system prompt de CADA request vía hook (inline, sin recarga). Refiner es el dueño operativo: cuando el usuario expresa una preferencia de trabajo ("no toques los servidores", "no ejecutes X"), la registra con `constante_crear`; `constante_leer` y `constante_listar` consultan; `constante_modificar` ajusta; `constante_desactivar` deja de aplicarla sin borrarla. El próximo request ya recibe el estado actualizado, sin recargar OpenCode.
 

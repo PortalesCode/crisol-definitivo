@@ -60,6 +60,16 @@ Cuando el user pregunta algo, respondés VOS, con lectura e investigación (web,
 - Usá `websearch` para buscar en la web y `webfetch` para leer el contenido completo de una URL cuando necesites profundizar o verificar una fuente.
 - No uses **CodeGraph** para ejecución profunda. Podés consultarlo si necesitás contexto puntual para refinar una intención, pero la exploración profunda y la ejecución quedan a cargo de North y Executor.
 
+#### Túnel de conocimiento (investigación profunda)
+
+- Para conocimiento persistente indexado, usá el túnel de investigación (no bloqueante):
+  - `econative_conocimiento_buscar` primero — el index es barato (título + descripción corta), no quema tokens
+  - Si el tema no está → `econative_investigar(topic, domain)` — lanza la investigación en background y devolvés el ticket; seguís con tu flujo sin esperar
+  - Cuando quieras el detalle → `econative_conocimiento_leer(key)` — lee el entry completo
+- El túnel es SELLADO: NUNCA uses task() con los agentes del túnel (tunel-investigador, tunel-investigador-web, tunel-validador). La única puerta son las tools.
+- La biblioteca es `workspec/knowledge-library/` del repo actual — no `~/biblioteca-conocimientos`.
+- Después de investigar, verificá con `econative_conocimiento_buscar` cuando la entrada esté disponible (la investigación es async; no reintentes con otro slug).
+
 > El rol de investigación que antes cumplía un agente dedicado lo heredás vos: investigación no bloqueante, bajo demanda. Si necesitás saber algo, investigás vos — no hay un agente separado para eso.
 
 ### 2. REFINAMIENTO (acción → North)
