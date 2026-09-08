@@ -54,17 +54,6 @@ Routing permitido: `refiner-only`, `refiner-north`, `executor-auditor` o `transv
 Reasoning permitido: `none`, `procedural`, `diagnostic`, `architectural` o `creative`.
 No se crean agentes nuevos; Executor siempre recibe el contexto más acotado posible.
 
-### Tools locales de conocimiento
-
-Las tools locales viven en `.opencode/tools/` y se cargan como parte del ecosistema:
-
-| Tool | Qué hace |
-|---|---|
-| `knowledge_search` | Consulta la biblioteca configurable mediante `KNOWLEDGE_LIBRARY_HOME` (default: `~/biblioteca-conocimientos`). Sin `target`, lista o busca entradas; con `target`, lee una entrada completa; `sections` limita las secciones devueltas. |
-| `knowledge_investigate` | Investiga un tema nuevo mediante el webhook n8n configurable por `N8N_KNOWLEDGE_WEBHOOK_URL` (default: localhost). Es asíncrona/fire-and-forget y hace dedupe antes de encolar. |
-
-La biblioteca de conocimiento y n8n son dependencias externas configurables: no se incluyen ni viajan con este repositorio. Si no están disponibles, Refiner debe informarlo y aplicar el fallback documentado (`websearch`/`webfetch`).
-
 ### Skills nativas
 
 | Skill | Dueño | Propósito |
@@ -104,7 +93,7 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 
 | Agente | Uso de herramientas |
 |---|---|
-| Refiner | `knowledge_search`/`knowledge_investigate` y Context7 para investigar y precisar la acción. |
+| Refiner | websearch/webfetch/Context7 para investigar y precisar la acción. |
 | North | Sequential Thinking solo para complejidad no obvia; decide CodeGraph y Graphify; Context7 para decisiones de APIs. |
 | Executor | Context7 para implementar APIs; CodeGraph/Graphify cuando North lo indique o la tarea lo necesite. |
 | Auditor | CodeGraph/Context7 para verificar; Graphify solo si aporta visualización. |
@@ -244,8 +233,6 @@ North decide según estas reglas:
 | `econative_save_preferences` | Guarda nombre e idioma del usuario en `workspec/preferences-user/`. |
 | `constante_*` | Plugin de constantes de laburo: `constante_crear`, `constante_leer`, `constante_listar`, `constante_modificar`, `constante_desactivar` — reglas del usuario que se inyectan en cada request. Las gestiona Refiner. Archivo: `workspec/constante/contantes.md`. |
 | `econative_patch_rapido` | Registra patch rápido en `workspec/context/PATCH-RAPIDO.md` con fecha/hora, cambio, por qué y por qué fue trivial. Lo usa solo Patcheador. |
-
-La estructura `.opencode/` también incluye la carpeta `.opencode/tools/` para las tools locales de conocimiento. Estas tools y sus dependencias externas no deben confundirse con los plugins del ecosistema.
 
 > **Constantes de laburo:** las constantes ACTIVAS se inyectan en el system prompt de CADA request vía hook (inline, sin recarga). Refiner es el dueño operativo: cuando el usuario expresa una preferencia de trabajo ("no toques los servidores", "no ejecutes X"), la registra con `constante_crear`; `constante_leer` y `constante_listar` consultan; `constante_modificar` ajusta; `constante_desactivar` deja de aplicarla sin borrarla. El próximo request ya recibe el estado actualizado, sin recargar OpenCode.
 

@@ -41,7 +41,7 @@ constante_crear/leer/listar/modificar/desactivar — Constantes de laburo del us
 
 ## 🧰 Matriz operativa
 
-Refiner → knowledge_search/knowledge_investigate + Context7 para investigar y precisar la acción.
+Refiner → Context7/websearch/webfetch para investigar y precisar la acción.
 North → Sequential Thinking solo para complejidad no obvia; decide CodeGraph/Graphify; Context7 para decisiones de APIs.
 Executor → Context7 para implementar APIs; CodeGraph/Graphify cuando North lo indique o la tarea lo necesite.
 Auditor → CodeGraph/Context7 para verificar; Graphify solo si aporta visualización.

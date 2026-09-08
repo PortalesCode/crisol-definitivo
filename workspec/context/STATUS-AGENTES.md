@@ -9,7 +9,7 @@
 🔴 Sin definir     🟡 En construcción     🟢 Estable
 ```
 
-**Estado actual:** 🟢 Estable — estructura limpia y coherente post-ronda 4 (auditoría aprobada con observaciones menores)
+**Estado actual:** 🟢 Estable — estructura limpia y coherente post-ronda 5 (eliminación de lfx-research, desconexión de la biblioteca de conocimiento)
 
 ---
 
@@ -17,8 +17,8 @@
 
 | Campo | Detalle |
 |---|---|
-| **Fecha** | 2026-08-13 |
-| **Qué pasó** | Ronda 4 de limpieza estructural: borrado del agente Especialista-Bibliotecario y todo el sistema de domains (plugins incluidos), skill architecture-review movida a North, Refiner sin desembarco + hueco de investigación heredado (no bloqueante), key MCP seq-thinking → sequential-thinking (nombre real), CONTANTS.md intacto (decisión del usuario), README.md reestructurado (ruido de despliegue fuera de AGENTS.md), .gitignore creado. Auditoría post-cambios: aprobado sin 🔴. |
+| **Fecha** | 2026-09-08 |
+| **Qué pasó** | Ronda 5: eliminación del MCP lfx-research y toda conexión con la biblioteca de conocimiento del ecosistema. Borrados `.opencode/mcp/lfx-research/`, `.opencode/knowledge-library/` y la skill `econative-lfx-research`. Limpiadas todas las referencias en AGENTS.md, Refiner.md, North.md, README.md, opencode.json, econative-inject-summary.ts y .gitignores. Refiner ahora investiga con websearch/webfetch/Context7 directo (sin biblioteca ni fallback). Decisión del usuario: el futuro motor de investigación será OpenCode puro con subagentes no bloqueantes (`opencode run`), no Langflow/LFX. |
 | **Decisiones** | Ver sección "Decisiones" abajo |
 
 ---
@@ -35,9 +35,10 @@
 8. **Sistema de domains**: ✅ ELIMINADO — plugins, carpeta y referencias limpiadas.
 9. **sequential-thinking**: ✅ key MCP con nombre real (sin abreviar).
 10. **Sistema de memorias del proyecto**: ✅ ELIMINADO — plugins `remember-it`/`remember-list`/`remember-show` y `stack-snapshot` borrados; `preferences-user` subió a `workspec/preferences-user/`; la carpeta de memorias fue eliminada (decisión del usuario). Documentación actualizada en AGENTS.md, README.md, .gitignore, install.sh y contextos.
-11. **Matriz operativa de MCPs/tools**: ✅ PUBLICADO — uso de CodeGraph, Context7, Sequential Thinking, Headroom, Graphify y knowledge tools por agente (commit f3872129).
+11. **Matriz operativa de MCPs/tools**: ✅ PUBLICADA — uso de CodeGraph, Context7, Sequential Thinking, Headroom y Graphify por agente (commit f3872129).
 12. **Separación STATUS.md / STATUS-AGENTES.md**: ✅ HECHA — STATUS.md documenta el proyecto anfitrión; STATUS-AGENTES.md es referencia viva del ecosistema dev.
 13. **Engram**: ✅ DECISIÓN — NO se forkeará por ahora. Se mantiene el criterio de instalación condicional (install.sh lo agrega a opencode.json local solo si no está en config global). No se reportan problemas de Engram.
+14. **lfx-research / biblioteca de conocimiento**: ✅ ELIMINADOS — el MCP `lfx-research` (Langflow/LFX), la biblioteca aislada `.opencode/knowledge-library` y la skill `econative-lfx-research` fueron borrados del árbol (queda en git history). Cero conexión con `~/biblioteca-conocimientos` ni n8n. Refiner investiga directo con `websearch`/`webfetch`/`Context7`. El futuro motor de investigación se decide en la siguiente ronda: **OpenCode puro + subagentes no bloqueantes con `opencode run`** (propuesta del usuario, pendiente de diseño).
 
 ## Proveedor y ciclo de skills externas
 
@@ -56,6 +57,7 @@ Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor
 
 ## Próximos Pasos
 
+- [ ] Diseñar el nuevo motor de investigación: OpenCode puro + subagente Investigador no bloqueante (`opencode run` desde el directorio actual, sin Langflow/LFX)
 - [ ] Pulir skill autoinstalable
 - [ ] Script start/stop del server de OpenCode
 - [ ] Decidir bootstrap curl|bash
@@ -70,3 +72,4 @@ Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor
 | CD-4 | Skill autoinstalable sin pulir | Abierto | Media |
 | CD-5 | Script start/stop del server sin crear | Abierto | Media |
 | CD-6 | Decisión de bootstrap curl|bash pendiente | Abierto | Baja |
+| CD-7 | Motor de investigación a reemplazar: lfx-research eliminado, falta diseñar subagente Investigador (`opencode run` no bloqueante) | Abierto | Alta |
