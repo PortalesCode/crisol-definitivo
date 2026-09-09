@@ -1,7 +1,8 @@
 # STATUS-AGENTES
 
-> **Referencia viva del ecosistema dev** — cómo está evolucionando el ecosistema (rondas, decisiones, issues CD-x).
+> **Referencia viva del ecosistema dev** — qué tiene el ecosistema HOY y qué falta.
 > NO es el estado del trabajo del proyecto anfitrión (eso va en STATUS.md).
+> El historial de desarrollo (rondas, decisiones pasadas) vive en git history — no acá.
 
 ## Estado General
 
@@ -9,65 +10,107 @@
 🔴 Sin definir     🟡 En construcción     🟢 Estable
 ```
 
-**Estado actual:** 🟢 Estable — estructura limpia y coherente post-ronda 6 (túnel de investigación CD-7 implementado)
+**Estado actual:** 🟢 Estable
 
 ---
 
-## Última Sesión
+## Agentes
 
-| Campo | Detalle |
+| Agente | Modo | Rol |
+|---|---|---|
+| `Refiner` | primary | Puerta de entrada. Entiende/refina la intención, consulta el triángulo, formula la acción. |
+| `North` | subagent | El cerebro. Crea, descompone y administra el plan; delega a Executor/Auditor. |
+| `Boehmio` | subagent | Creativo. Abre la cabeza, analiza ideas. |
+| `Realistic` | subagent | Realista. Baja a tierra, valida, puntúa 1-10. |
+| `Executor` | subagent | La mano de North. Ejecuta. |
+| `Auditor` | subagent | Verifica que lo ejecutado esté perfecto. |
+| `Patcheador` | subagent | Vía rápida para lo trivial (<10 líneas, 1 archivo). No pasa por North/Executor/Auditor. |
+| `tunel-investigador` | primary (oculto) | Orquestador del túnel de investigación. Lo lanza SOLO la tool `econative_investigar` vía `opencode run`. NO se invoca con task(). |
+| `tunel-investigador-web` | subagent (oculto) | Investiga crudo en la web. Solo lo llama tunel-investigador. |
+| `tunel-validador` | subagent (oculto) | Control de calidad del túnel: estructura + fuentes + score. Solo lo llama tunel-investigador. |
+
+**Regla de oro del túnel:** los agentes `tunel-*` NO se invocan con `task()` desde el ecosistema visible. La única puerta son las tools `econative_*`.
+
+---
+
+## Skills nativas
+
+| Skill | Dueño | Propósito |
+|---|---|---|
+| `econative-architecture-review` | North | Evaluar arquitectura, impacto, riesgos |
+| `econative-parallel-dispatch` | North | Detectar independencia y lanzar Executors en paralelo |
+| `econative-skill-installer` | Refiner | Investigar skills externas y preparar intake (no instala) |
+| `econative-adaptive-tone` | Refiner | Adaptar tono según nivel técnico del usuario |
+| `econative-implement-safe` | Executor | Implementación segura (reglas, rollback) |
+| `econative-debug-systematic` | Executor | Debugging metódico |
+| `econative-test-and-validate` | Executor | Testing y validación |
+| `econative-audit-review` | Auditor | Revisión estructurada |
+
+---
+
+## MCPs (6)
+
+| MCP | Tipo | Detalle |
+|---|---|---|
+| `sequential-thinking` | local | Razonamiento estructurado multi-paso (solo tareas complejas) |
+| `codegraph` | local | Grafo del código: símbolos, edges, blast radius (`npx @colbymchenry/codegraph@1.5.0`) |
+| `headroom` | local | Optimización de contexto LLM (`uvx headroom-ai[mcp]`, requiere uv) |
+| `context7` | remoto | Documentación de librerías bajo demanda |
+| `chrome-devtools` | local | Navegación, snapshots, red y consola del navegador |
+| `playwright` | local | Automatización E2E de navegador |
+
+---
+
+## Plugins (tools del ecosistema)
+
+| Tool | Qué hace |
 |---|---|
-| **Fecha** | 2026-09-08 |
-| **Qué pasó** | Ronda 5: eliminación del MCP lfx-research y toda conexión con la biblioteca de conocimiento del ecosistema. Borrados `.opencode/mcp/lfx-research/`, `.opencode/knowledge-library/` y la skill `econative-lfx-research`. Limpiadas todas las referencias en AGENTS.md, Refiner.md, North.md, README.md, opencode.json, econative-inject-summary.ts y .gitignores. Refiner ahora investiga con websearch/webfetch/Context7 directo (sin biblioteca ni fallback). Decisión del usuario: el futuro motor de investigación será OpenCode puro con subagentes no bloqueantes (`opencode run`), no Langflow/LFX. |
-| **Fecha** | 2026-09-08 (2a sesión) |
-| **Qué pasó** | Ronda 6: implementación del motor de investigación CD-7 (túnel sellado). Creados 3 agentes ocultos (tunel-investigador primary, tunel-investigador-web, tunel-validador), plugin econative-conocimiento.ts con 3 tools (econative_investigar no bloqueante vía opencode run, econative_conocimiento_buscar barato, econative_conocimiento_leer), biblioteca movida a workspec/knowledge-library/. Agregados MCPs chrome-devtools y playwright al opencode.json (6 totales). langflow eliminado de la config global. Auditoría PASS. |
-| **Decisiones** | Ver sección "Decisiones" abajo |
+| `econative_start_session` | Inicio obligatorio de sesión (contexto + prefs + plan) |
+| `econative_context_read` | Lee los .md de workspec/context/ |
+| `econative_plan` | Única tool de gestión del plan (design/start/close/status/archive) |
+| `econative_plan_read` / `econative_plan_archive` | Helpers del ciclo del plan |
+| `econative_save_preferences` | Guarda nombre, idioma y nivel técnico |
+| `constante_*` | Constantes de laburo del usuario (se inyectan en cada request) |
+| `econative_patch_rapido` | Registra patch rápido (solo Patcheador) |
+| `econative_investigar` | Lanza el túnel de investigación (no bloqueante, via opencode run) |
+| `econative_conocimiento_buscar` | Index barato: título + descripción corta (ahorro de tokens) |
+| `econative_conocimiento_leer` | Lee el entry completo de conocimiento (key "domain/slug") |
 
+### Tools locales (`.opencode/tools/`)
+
+| Tool | Qué hace |
+|---|---|
+| `skill_catalog_search` | Busca en el catálogo AgentSkillExchange (con `sortBy`: stars/downloads) |
+| `skill_intake_inspect` | Inspecciona una skill remota sin instalar (ficha completa, read-only) |
+| `skill_install_external` | Instala una skill aprobada (transaccional, rollback) |
+| `skill_validate_external` | Valida una skill instalada (checksums, read-only) |
 
 ---
 
-## Decisiones
+## Túnel de conocimiento
 
-1. **Cableado skill()**: ✅ RESTAURADO — todos los agentes instruyen cargar sus skills con `skill()`.
-2. **context7 MCP**: ✅ CONFIGURADO y activo en definitive (viaja con el paquete, remoto).
-3. **ARCHITECTURE.md**: ✅ Template completo de 51 líneas restaurado como referencia.
-4. **Estructura del definitivo**: ✅ `.opencode/` + `workspec/` hermanas, `AGENTS.md` y `opencode.json` en raíz, `install.sh` para el despliegue (sin modo desembarco).
-5. **README idioma**: ✅ RESUELTO — español (README.md creado con ruido de despliegue, AGENTS.md enfocado en el usuario).
-6. **Rol Refiner/North**: ✅ DEFINIDO — Refiner entiende/refina la intención y formula la acción; North crea, descompone y administra el ciclo completo del plan (flujo: Refiner → triángulo → North → Executor → Auditor).
-7. **Especialista-Bibliotecario**: ✅ ELIMINADO — la investigación la hereda Refiner (herramienta no bloqueante del entorno, tipo knowledge_search/knowledge_investigate; fallback websearch/webfetch).
-8. **Sistema de domains**: ✅ ELIMINADO — plugins, carpeta y referencias limpiadas.
-9. **sequential-thinking**: ✅ key MCP con nombre real (sin abreviar).
-10. **Sistema de memorias del proyecto**: ✅ ELIMINADO — plugins `remember-it`/`remember-list`/`remember-show` y `stack-snapshot` borrados; `preferences-user` subió a `workspec/preferences-user/`; la carpeta de memorias fue eliminada (decisión del usuario). Documentación actualizada en AGENTS.md, README.md, .gitignore, install.sh y contextos.
-11. **Matriz operativa de MCPs/tools**: ✅ PUBLICADA — uso de CodeGraph, Context7, Sequential Thinking, Headroom y Graphify por agente (commit f3872129).
-12. **Separación STATUS.md / STATUS-AGENTES.md**: ✅ HECHA — STATUS.md documenta el proyecto anfitrión; STATUS-AGENTES.md es referencia viva del ecosistema dev.
-13. **Engram**: ✅ DECISIÓN — NO se forkeará por ahora. Se mantiene el criterio de instalación condicional (install.sh lo agrega a opencode.json local solo si no está en config global). No se reportan problemas de Engram.
-14. **lfx-research / biblioteca de conocimiento**: ✅ ELIMINADOS — el MCP `lfx-research` (Langflow/LFX), la biblioteca aislada (`.opencode/knowledge-library`, hoy en `workspec/knowledge-library/`) y la skill `econative-lfx-research` fueron borrados del árbol (queda en git history). Cero conexión con `~/biblioteca-conocimientos` ni n8n. Refiner investiga directo con `websearch`/`webfetch`/`Context7`. El futuro motor de investigación se decide en la siguiente ronda: **OpenCode puro + subagentes no bloqueantes con `opencode run`** (propuesta del usuario, pendiente de diseño).
-15. **Túnel de investigación CD-7**: ✅ IMPLEMENTADO — motor OpenCode puro (sin Langflow/LFX): tool `econative_investigar` hace spawn no bloqueante de `opencode run --agent tunel-investigador` desde la raíz del repo (cwd=context.directory), con OPENCODE_SUBAGENT=1 (guard anti-recursión) y detached/unref. 3 agentes ocultos: tunel-investigador (orquestador, primary), tunel-investigador-web (investiga crudo), tunel-validador (QA con score/verdict/feedback, verifica URLs). Regla de oro: NUNCA task() a agentes del túnel — solo tools. Auditoría PASS.
-16. **Biblioteca de conocimiento**: ✅ MOVIDA a `workspec/knowledge-library/` (era `.opencode/knowledge-library/`) — el conocimiento es del proyecto anfitrión, no del ecosistema. index.json (metadata barata: title + descripcion_corta) + template.md (formato estándar: ## metadata, #### secciones, ## Fuentes). Cero conexión con ~/biblioteca-conocimientos.
-17. **MCPs del definitive**: ✅ 6 totales — sequential-thinking, codegraph, headroom, context7 + chrome-devtools + playwright (nuevos, los usa tunel-investigador-web para contenido dinámico). langflow ELIMINADO de la config global de OpenCode.
+- **Biblioteca:** `workspec/knowledge-library/` (del proyecto anfitrión) — `index.json` (metadata barata) + `<domain>/<slug>.md` (formato estándar: # título, ## Descripción corta, ## Resumen ejecutivo, #### secciones, ## Fuentes).
+- **Flujo:** `econative_conocimiento_buscar` (barato) → si no está, `econative_investigar` (async, no bloqueante) → cuando termine, `econative_conocimiento_leer` (completo).
+- **Sellado:** el túnel es la única vía de investigación persistente indexada. Nunca `task()` a `tunel-*`.
+- **Guard anti-recursión:** el proceso lanzado lleva `OPENCODE_SUBAGENT=1`.
 
+---
 
-## Proveedor y ciclo de skills externas
+## Proveedor de skills externas
 
-El ecosistema **no mantiene un catálogo curado propio** de skills externas. El proveedor principal es **AgentSkillExchange**:
-
-- Repositorio: <https://github.com/agentskillexchange/skills>
-- Índice: <https://raw.githubusercontent.com/agentskillexchange/skills/main/skills.json>
-
-El índice sirve para descubrir skills, mientras que la fuente upstream original declarada para cada skill se conserva como su origen de instalación. `skill-library`/PortalesCode no es una fuente operativa de skills externas; las referencias a PortalesCode en el README se limitan al repositorio del ecosistema.
-
-Al instalar una skill de terceros, se preserva todo su contenido en `.opencode/skills/extern/<slug>/`, se agrega `crisol-eco.yaml` y se añade el bloque `## Crisol-Eco: integración`. Las dependencias MCP/CLI no se instalan implícitamente: el usuario debe aprobarlas como tareas explícitas.
-
-Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor** instala; **Auditor** verifica.
+- **AgentSkillExchange** es la única fuente de catálogo (2,976 skills, multi-framework: Claude Code, Codex, MCP, Gemini, etc.).
+- Catálogo: `https://raw.githubusercontent.com/agentskillexchange/skills/main/skills.json`
+- Instalación: preserva todo el paquete upstream en `.opencode/skills/extern/<slug>/` + `crisol-eco.yaml` + bloque `## Crisol-Eco: integración`.
+- Dependencias MCP/CLI no se instalan implícitamente: se aprueban como tareas explícitas.
+- Flujo: Refiner analiza y formula → North planifica → Executor instala → Auditor verifica.
 
 ---
 
 ## Próximos Pasos
 
-- [ ] Probar el túnel de investigación en runtime con una investigación real (CD-7 implementado, falta prueba E2E)
-- [ ] Pulir skill autoinstalable
-- [ ] Script start/stop del server de OpenCode
-- [ ] Decidir bootstrap curl|bash
+- [ ] Probar el pipeline completo de skills con una skill real de ASE (CD-4)
+- [ ] Script start/stop del server de OpenCode (CD-5)
+- [ ] Decidir bootstrap curl|bash (CD-6)
 - [ ] Probar en runtime la continuidad North→Refiner→North con task_id
 
 ---
@@ -76,7 +119,6 @@ Routing/refining: **Refiner** analiza y formula; **North** planifica; **Executor
 
 | ID | Descripción | Estado | Prioridad |
 |---|---|---|---|
-| CD-4 | Skill autoinstalable sin pulir | Abierto | Media |
+| CD-4 | Skill autoinstalable sin pulir (pipeline nunca probado con skill real) | Abierto | Media |
 | CD-5 | Script start/stop del server sin crear | Abierto | Media |
-| CD-6 | Decisión de bootstrap curl|bash pendiente | Abierto | Baja |
-| CD-7 | Motor de investigación: ✅ IMPLEMENTADO (túnel sellado) — pendiente prueba E2E en runtime | Abierto (prueba) | Alta |
+| CD-6 | Decisión de bootstrap curl\|bash pendiente | Abierto | Baja |
