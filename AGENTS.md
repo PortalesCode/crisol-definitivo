@@ -276,7 +276,6 @@ North decide según estas reglas:
 - `workspec/context/CONVENTIONS.md` — reglas del repo anfitrión
 - `workspec/context/STATUS.md` — estado del TRABAJO del proyecto anfitrión
 - `workspec/context/PATCH-RAPIDO.md` — log de patches rápidos de Patcheador (Refiner le da significado incluso a lo trivial)
-- `workspec/context/STATUS-AGENTES.md` — referencia viva del ecosistema dev (rondas, decisiones, issues CD-x). NO es el estado del anfitrión.
 
 ## Notas
 

@@ -1,7 +1,6 @@
 # STATUS
 
 > Documenta el estado del PROYECTO ANFITRIÓN (el repo donde se instaló el ecosistema). No es el estado del ecosistema.
-> El estado del ecosistema (referencia viva del ecosistema dev) va en STATUS-AGENTES.md.
 
 ## Estado General
 

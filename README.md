@@ -153,7 +153,7 @@ crisol-definitive/
 ├── Agents-engram-memory/ # Protocolo engram (se mergea al AGENTS.md global)
 ├── workspec/
 │   ├── knowledge-library/ # Biblioteca del túnel de conocimiento (index.json + entries)
-│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS, STATUS-AGENTES
+│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS
 │   ├── plans/        # Plan activo y archivados
 │   ├── preferences-user/ # Preferencias del usuario (nombre, idioma)
 │   └── constante/    # Constantes de laburo del usuario (contantes.md)
