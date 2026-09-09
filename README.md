@@ -14,37 +14,44 @@ Ecosistema portable de agentes para OpenCode. Trae agentes (Refiner, North, Boeh
 El ecosistema se instala en el directorio donde ejecutes el script (tu raíz de proyecto).
 
 **Pasos:**
-1. Cloná el crisol en una ubicación fija (una sola vez):
-   `git clone https://github.com/PortalesCode/crisol-definitivo.git ~/crisol-definitivo`
+1. Parate en la raíz de TU proyecto y cloná:
+   `git clone https://github.com/PortalesCode/crisol-definitivo.git`
 
-2. Parate en la raíz de TU proyecto y ejecutá:
-   `~/crisol-definitivo/install.sh`
+2. Ejecutá el instalador:
+   `crisol-definitivo/install.sh`
 
 El instalador detecta automáticamente el directorio actual y desembarca el ecosistema ahí. Sin necesidad de parámetros adicionales.
 
-Opcional: para instalar en un directorio distinto, usá `--target <dir>`.
+3. El instalador desembarca todo (`.opencode/`, `workspec/`, `AGENTS.md`, `opencode.json`) y **se borra a sí mismo** (auto-limpieza) — no hace falta `rm -rf` a mano.
 
-3. Si querés evitar preguntas interactivas, ejecutá con `--no-tools` (instala solo el ecosistema sin herramientas opcionales como uv/graphify/engram).
+4. Escribí `opencode` y listo.
+
+Opciones:
+- `--target <dir>`: para instalar en un directorio distinto (default: el actual).
+- `--no-tools`: evita preguntas interactivas (instala solo el ecosistema sin herramientas opcionales como uv/graphify/engram).
+- `--keep-package`: conserva el paquete después de instalar (útil si querés reutilizarlo o clonar en una ubicación fija).
 
 ## Pasos detallados del instalador
 
-1. Cloná el paquete en una ubicación fija (una sola vez):
+1. Parate en la raíz de TU proyecto y cloná el paquete:
 
    ```bash
-   git clone https://github.com/PortalesCode/crisol-definitivo.git ~/crisol-definitivo
+   git clone https://github.com/PortalesCode/crisol-definitivo.git
    ```
 
-2. Parate en la raíz de TU proyecto y ejecutá el instalador:
+2. Ejecutá el instalador desde la raíz del proyecto:
 
    ```bash
-   cd /ruta/a/tu/proyecto
-   ~/crisol-definitive/install.sh
+   crisol-definitivo/install.sh
    ```
 
-   Si ya estás en la raíz del proyecto, ejecutá directamente `~/crisol-definitive/install.sh`.
+   Si ya estás en la raíz del proyecto, no hace falta `cd` — el instalador detecta el directorio actual y desembarca el ecosistema ahí.
 
 3. El instalador despliega `.opencode/` (agentes, skills, plugins), `workspec/` (context, planes, preferencias del usuario), `AGENTS.md` y `opencode.json` dentro del repo destino.
-4. **Reiniciá OpenCode** para que skills, plugins y MCPs tomen efecto.
+4. **Auto-limpieza:** al terminar, el instalador **borra su propio directorio** (`crisol-definitivo/`) si fue clonado dentro del destino. No hace falta `rm -rf` a mano.
+5. **Reiniciá OpenCode** para que skills, plugins y MCPs tomen efecto.
+
+> **Nota:** si clonás en una ubicación fija (tipo `~/crisol-definitivo`, fuera del destino), el paquete **no** se borra solo. Usá `--keep-package` para conservarlo — útil si clonás en ubicación fija o querés reutilizarlo.
 
 ### Proveedor de skills externas
 
@@ -86,6 +93,7 @@ del reinicio. Auditor marca como **warning** cualquier intento de usarla sin rei
 | `--dry-run` | Muestra qué haría sin copiar nada |
 | `--yes` | Instala uv, graphify y engram sin preguntar (si no están instalados) |
 | `--no-tools` | Saltea la instalación de herramientas (no pregunta nada) |
+| `--keep-package` | Conserva el paquete después de instalar (útil si clonás en ubicación fija o querés reutilizarlo) |
 
 > **Pasos 5/5 y 6/6 (uv + graphify + engram):** al final, el instalador pregunta si instalás `uv` (requisito del MCP `headroom`), `graphify` (herramienta opcional de grafo de conocimiento del código) y `engram` (memoria persistente global). Es interactivo `[s/N]`; usá `--yes` para aceptar la instalación de uv, graphify y engram sin preguntar o `--no-tools` para saltear las herramientas opcionales. No es bloqueante: el resto del ecosistema funciona igual.
 
@@ -169,4 +177,4 @@ crisol-definitive/
   - Si NO lo tenés en global → lo agrega al `opencode.json` **local** del proyecto destino, con **backup `.bak`** antes de escribir y **verificación post-escritura** (JSON válido + contiene `engram`, con rollback desde el backup si falla). Así el MCP queda disponible sin arriesgar tu config global.
 - El instalador la propone como **Paso 6/6** (opcional, no bloqueante): detecta si ya está instalada, la instala si falta (o pregunta) y mergea su protocolo al `AGENTS.md` global de OpenCode (`~/.config/opencode/AGENTS.md`) con un merge sano por marcadores (`ENGRAM-MEMORY-START`). Solo llama a `setup_engram_mcp` (MCP local) cuando el binario `engram` quedó disponible.
 - Si ya la usás, el instalador **no toca tu `AGENTS.md` global**: el merge es idempotente y solo agrega el bloque del protocolo si no lo tenés ya. Si no la tenés, podés instalarla después con `brew install gentleman-programming/tap/engram` o `go install github.com/Gentleman-Programming/engram/cmd/engram@latest`.
-- Variables de entorno: `INSTALL_GRAPHIFY` e `INSTALL_ENGRAM` se pueden overridear (`ask` | `yes` | `no`) — útil para testing no invasivo (ej: `INSTALL_ENGRAM=no ~/crisol-definitive/install.sh`).
+- Variables de entorno: `INSTALL_GRAPHIFY` e `INSTALL_ENGRAM` se pueden overridear (`ask` | `yes` | `no`) — útil para testing no invasivo (ej: `INSTALL_ENGRAM=no crisol-definitivo/install.sh`).
