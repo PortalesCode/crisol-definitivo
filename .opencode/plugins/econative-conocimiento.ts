@@ -98,7 +98,9 @@ export default (async () => {
           + "con múltiples runtimes). "
           + "Devuelve un ticket con status 'investigando', topics[], keys[], el archivo esperado "
           + "y el pid. El conocimiento queda disponible en la biblioteca en ~5 minutos — NO esperar activamente. "
-          + "Si algún topic ya existe en el index, se reporta en already_exists y no se re-investiga.",
+          + "Si algún topic ya existe en el index, se reporta en already_exists y no se re-investiga. "
+          + 'Ejemplo: econative_investigar({ topics: ["historia de warcraft", "historia de gta vice city"], domain: "videojuegos" }). '
+          + "Los topics deben ser CONCISOS (frase breve, sin paréntesis ni comas complejas). Topics extensos pueden generar JSON inválido en la llamada.",
         args: {
           topic: tool.schema.string().optional().describe("Tema a investigar (opcional si usás topics)"),
           topics: tool.schema.array(tool.schema.string()).optional().describe("Lista de temas a investigar en un solo envión (multi-topic). Alternativa a topic. Con varios topics se lanza UN solo opencode run que investiga todos."),
