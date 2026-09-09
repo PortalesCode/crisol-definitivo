@@ -1,6 +1,6 @@
 # Crisol Definitive
 
-Ecosistema portable de agentes para OpenCode. Trae agentes (Refiner, North, Boehmio, Realistic, Executor, Auditor), skills nativas, plugins y MCPs listos para usar en cualquier repo. Se instala dentro del repo destino con un solo comando y los agentes se enfocan en lo que querés, no en el ruido de despliegue.
+Ecosistema portable de agentes para OpenCode. Trae agentes (Refiner, North, Boehmio, Realistic, Executor, Auditor + auxiliares Ojo, PDF, Patcheador y túnel oculto), skills nativas, plugins y MCPs listos para usar en cualquier repo. Se instala dentro del repo destino con un solo comando y los agentes se enfocan en lo que querés, no en el ruido de despliegue.
 
 ## Requisitos
 
@@ -28,6 +28,8 @@ El instalador detecta automáticamente el directorio actual y desembarca el ecos
 
 Opciones:
 - `--target <dir>`: para instalar en un directorio distinto (default: el actual).
+- `--dry-run`: muestra qué haría sin copiar nada.
+- `--yes`: instala uv, graphify y engram sin preguntar (si no están instalados).
 - `--no-tools`: evita preguntas interactivas (instala solo el ecosistema sin herramientas opcionales como uv/graphify/engram).
 - `--keep-package`: conserva el paquete después de instalar (útil si querés reutilizarlo o clonar en una ubicación fija).
 
@@ -99,7 +101,7 @@ del reinicio. Auditor marca como **warning** cualquier intento de usarla sin rei
 
 ## MCPs incluidos
 
-Los 6 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
+Los 7 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
 
 | MCP | Tipo | Qué hace |
 |---|---|---|
@@ -109,6 +111,7 @@ Los 6 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
 | `context7` | remoto | Documentación de librerías bajo demanda |
 | `chrome-devtools` | local (npx) | Control de Chrome DevTools: navegación, snapshots, screenshots, red y consola (`chrome-devtools-mcp@latest`) |
 | `playwright` | local (npx) | Automatización de navegador end-to-end: testear y validar UIs en el navegador real (`@playwright/mcp`) |
+| `markitdown` | local (uvx) | Conversión de archivos a markdown (PDFs, Office, HTML, audio, imágenes) |
 
 ## Túnel de conocimiento
 
@@ -147,14 +150,14 @@ constante_crear({ titulo: "No tocar servidores", detalle: "No ejecutar comandos 
 ```
 crisol-definitive/
 ├── .opencode/
-│   ├── agents/       # Refiner, North, Boehmio, Realistic, Executor, Auditor + agentes ocultos del túnel (tunel-*)
+│   ├── agents/       # Refiner, North, Boehmio, Realistic, Executor, Auditor, Patcheador, Ojo, PDF + ocultos del túnel (tunel-*)
 │   ├── skills/       # Skills nativas por dueño (north/, executor/, auditor/, refiner/)
 │   ├── tools/        # Tools locales del ecosistema
 │   ├── plugins/      # Tools del ecosistema (econative_*)
 ├── Agents-engram-memory/ # Protocolo engram (se mergea al AGENTS.md global)
 ├── workspec/
 │   ├── knowledge-library/ # Biblioteca del túnel de conocimiento (index.json + entries)
-│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS
+│   ├── context/      # PROJECT, ARCHITECTURE, CONVENTIONS, STATUS, PATCH-RAPIDO
 │   ├── plans/        # Plan activo y archivados
 │   ├── preferences-user/ # Preferencias del usuario (nombre, idioma)
 │   └── constante/    # Constantes de laburo del usuario (contantes.md)
@@ -173,7 +176,7 @@ crisol-definitive/
 ### Engram (memoria persistente global)
 
 - **Engram** es una herramienta de **memoria persistente global** (binario Go standalone, repo `Gentleman-Programming/engram`) útil para **cualquier agente MCP**, no solo este ecosistema. Guarda decisiones, bugs y descubrimientos (SQLite + FTS5) entre sesiones. Se instala globalmente (no en el repo), igual que `uv`/`graphify` — solo `engram`, sin `gentle-ai`.
-- **El MCP `engram` NO viaja hardcodeado en el `opencode.json` del paquete** (viaja limpio: solo `sequential-thinking`, `codegraph`, `headroom`, `context7`, `chrome-devtools` y `playwright`). El `install.sh` decide con `setup_engram_mcp()`:
+- **El MCP `engram` NO viaja hardcodeado en el `opencode.json` del paquete** (viaja limpio: solo `sequential-thinking`, `codegraph`, `headroom`, `context7`, `chrome-devtools`, `playwright` y `markitdown`). El `install.sh` decide con `setup_engram_mcp()`:
   - Si ya tenés el MCP `engram` en tu config **GLOBAL** de OpenCode (`~/.config/opencode/opencode.json` o `.jsonc`) → no toca nada (el global alcanza a todos los proyectos locales).
   - Si NO lo tenés en global → lo agrega al `opencode.json` **local** del proyecto destino, con **backup `.bak`** antes de escribir y **verificación post-escritura** (JSON válido + contiene `engram`, con rollback desde el backup si falla). Así el MCP queda disponible sin arriesgar tu config global.
 - El instalador la propone como **Paso 6/6** (opcional, no bloqueante): detecta si ya está instalada, la instala si falta (o pregunta) y mergea su protocolo al `AGENTS.md` global de OpenCode (`~/.config/opencode/AGENTS.md`) con un merge sano por marcadores (`ENGRAM-MEMORY-START`). Solo llama a `setup_engram_mcp` (MCP local) cuando el binario `engram` quedó disponible.

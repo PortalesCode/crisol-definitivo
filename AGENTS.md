@@ -60,6 +60,7 @@ No se crean agentes nuevos; Executor siempre recibe el contexto más acotado pos
 |---|---|---|
 | `econative-architecture-review` | North | Evaluar arquitectura, componentes, límites, impacto, escalabilidad |
 | `econative-skill-installer` | Refiner | Investigar skills externas y preparar intake; no instala |
+| `econative-adaptive-tone` | Refiner | Adaptar tono según `nivel_tecnico` |
 | `econative-parallel-dispatch` | North | Detectar tareas independientes y lanzar Executors en paralelo |
 | `econative-implement-safe` | Executor | Implementación segura (reglas, rollback) |
 | `econative-debug-systematic` | Executor | Debugging metódico |
@@ -173,6 +174,7 @@ Son **patrones operativos** del ecosistema — definen *cómo trabajan los agent
 |---|---|---|
 | `econative-architecture-review` | North | Revisar arquitectura y detectar riesgos |
 | `econative-skill-installer` | Refiner | Investigar skills bajo demanda desde AgentSkillExchange/upstream y preparar intake |
+| `econative-adaptive-tone` | Refiner | Adaptar tono según `nivel_tecnico` |
 | `econative-parallel-dispatch` | North | Detectar independencia y lanzar ejecutores paralelos |
 | `econative-implement-safe` | Executor | Implementación segura (reglas de edición, rollback) |
 | `econative-debug-systematic` | Executor | Debugging metódico (6 pasos + antipatrones) |
@@ -286,9 +288,10 @@ North decide según estas reglas:
 
 ## Notas
 
-- Los agentes se cargan desde `agents/`
-- Las skills en `skills/native/`
-- Los plugins en `plugins/`
+- Los agentes se cargan desde `.opencode/agents/`
+- Las skills en `.opencode/skills/native/`
+- Los plugins en `.opencode/plugins/`
+- Las tools locales del ecosistema (skill_catalog_search y las otras 3 de skills) en `.opencode/tools/`
 - Las preferencias del usuario viven en `workspec/preferences-user/`
 
 ## Tools reales para skills externas
