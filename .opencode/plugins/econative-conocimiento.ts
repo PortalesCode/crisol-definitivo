@@ -91,14 +91,17 @@ export default (async () => {
     tool: {
       econative_investigar: tool({
         description:
-          "Puerta de entrada al túnel de investigación. NO BLOQUEANTE: valida el topic, "
-          + "dedupe contra el index de la biblioteca de conocimiento y lanza "
-          + "`opencode run --agent tunel-investigador` en background desde la raíz del repo. "
-          + "Devuelve un ticket con status 'investigando', la key 'domain/slug', el archivo "
-          + "esperado y el pid del proceso. Si el topic ya existe en el index, devuelve "
-          + "already_exists: true y NO relanza la investigación.",
+          "Puerta de entrada al túnel de investigación. NO BLOQUEANTE: valida topics, "
+          + "hace dedupe contra el index y lanza UN SOLO `opencode run --agent tunel-investigador` "
+          + "en background desde la raíz del repo. "
+          + "Acepta `topic` (uno solo) o `topics` (varios en un mismo envión — evita saturar CPU "
+          + "con múltiples runtimes). "
+          + "Devuelve un ticket con status 'investigando', topics[], keys[], el archivo esperado "
+          + "y el pid. El conocimiento queda disponible en la biblioteca en ~5 minutos — NO esperar activamente. "
+          + "Si algún topic ya existe en el index, se reporta en already_exists y no se re-investiga.",
         args: {
-          topic: tool.schema.string().describe("Tema a investigar (obligatorio)"),
+          topic: tool.schema.string().optional().describe("Tema a investigar (opcional si usás topics)"),
+          topics: tool.schema.array(tool.schema.string()).optional().describe("Lista de temas a investigar en un solo envión (multi-topic). Alternativa a topic. Con varios topics se lanza UN solo opencode run que investiga todos."),
           domain: tool.schema.string().optional().describe("Dominio de la biblioteca (default: general)"),
           modo: tool.schema.string().optional().describe("Modo del subagente: investigar | expandir (default: investigar)"),
         },
@@ -106,38 +109,68 @@ export default (async () => {
           try {
             const root = context.directory;
 
-            const topic = (args.topic as string | undefined)?.trim();
-            if (!topic) {
-              return { output: JSON.stringify({ ok: false, error: "topic es obligatorio" }) };
+            const topicRaw = (args.topic as string | undefined)?.trim() || "";
+            const topicsRaw = Array.isArray(args.topics) ? args.topics : [];
+            const topics = [
+              ...(topicRaw ? [topicRaw] : []),
+              ...topicsRaw.map((t: unknown) => String(t).trim()).filter((t: string) => t.length > 0),
+            ].filter((v, i, a) => a.indexOf(v) === i); // dedupe por texto exacto
+            if (topics.length === 0) {
+              return { output: JSON.stringify({ ok: false, error: "topic o topics es obligatorio" }) };
+            }
+
+            const pipeTopic = topics.find((t: string) => t.includes("|"));
+            if (pipeTopic) {
+              return {
+                output: JSON.stringify({
+                  ok: false,
+                  error: `topic no puede contener '|' (es el separador interno del túnel): "${pipeTopic}"`,
+                }),
+              };
             }
 
             const domainRaw = ((args.domain as string | undefined)?.trim() || "general");
             const modo = (args.modo as string | undefined) === "expandir" ? "expandir" : "investigar";
-
-            const slug = slugify(topic) || "tema";
             const domain = slugify(domainRaw) || "general";
-            const key = `${domain}/${slug}`;
-            const file = `${key}.md`;
 
             const indexRes = readIndex(root);
             if ("error" in indexRes) {
               return { output: JSON.stringify({ ok: false, error: indexRes.error }) };
             }
+            const index = indexRes.index;
 
-            const existing = indexRes.index.entries[key];
-            if (existing) {
+            const entries = topics.map((t: string) => {
+              const slug = slugify(t) || "tema";
+              const key = `${domain}/${slug}`;
+              const file = `${key}.md`;
+              const existing = index.entries[key] as Record<string, unknown> | undefined;
+              return { topic: t, slug, key, file, existing: existing ?? null };
+            });
+
+            const seenKeys = new Set<string>();
+            const dedupedEntries: typeof entries = [];
+            for (const e of entries) {
+              if (seenKeys.has(e.key)) continue;
+              seenKeys.add(e.key);
+              dedupedEntries.push(e);
+            }
+
+            const toInvestigate = dedupedEntries.filter((e) => !e.existing);
+            const alreadyExists = dedupedEntries.filter((e) => e.existing);
+
+            if (toInvestigate.length === 0) {
               return {
                 output: JSON.stringify({
                   ok: false,
                   already_exists: true,
-                  key,
-                  file: (existing.file as string | undefined) || file,
-                  message: "ya existe — usá modo expandir",
+                  keys: dedupedEntries.map((e) => e.key),
+                  topics: dedupedEntries.map((e) => e.topic),
+                  message: "todos los temas ya existen — usá modo expandir",
                 }),
               };
             }
 
-            const prompt = `modo=${modo} topic=${topic} domain=${domain} biblioteca=${LIB_DIR}`;
+            const prompt = `modo=${modo} topics=${toInvestigate.map((e) => e.topic).join("|")} domain=${domain} biblioteca=${LIB_DIR}`;
 
             let child;
             try {
@@ -156,8 +189,6 @@ export default (async () => {
               };
             }
 
-            // ENOENT (binario no encontrado) llega como evento async: lo tragamos
-            // para no crashear el host del plugin. El pid queda null en ese caso.
             child.on("error", () => {});
             child.unref();
 
@@ -165,12 +196,16 @@ export default (async () => {
               output: JSON.stringify({
                 ok: true,
                 status: "investigando",
-                key,
-                file,
-                topic,
+                topics: toInvestigate.map((e) => e.topic),
+                keys: toInvestigate.map((e) => e.key),
+                files: toInvestigate.map((e) => e.file),
+                already_exists: alreadyExists.map((e) => e.key),
+                topic: toInvestigate[0]?.topic ?? null,
+                key: toInvestigate[0]?.key ?? null,
                 domain,
                 modo,
                 pid: child.pid ?? null,
+                message: "Investigación lanzada (no bloqueante). El conocimiento queda disponible en la biblioteca en unos minutos (~5 min).",
               }),
             };
           } catch (err) {

@@ -148,10 +148,13 @@ Preferencias = configuración del usuario (nombre, idioma)
 
   | Tool | Qué hace | Costo |
   |---|---|---|
-  | `econative_investigar` | Lanza investigación no bloqueante (ticket inmediato) | 1 spawn background |
+  | `econative_investigar` | Lanza investigación no bloqueante — topic único o `topics[]` multi-área en UN solo envión | 1 spawn background |
   | `econative_conocimiento_buscar` | Index barato: lista título + descripción corta | Baratísimo (sin contenido) |
   | `econative_conocimiento_leer` | Lee el `.md` completo de un entry (key `domain/slug`) | Solo cuando hace falta |
 
+- **Multi-topic:** la tool acepta `topic` (1) o `topics: ["a", "b"]`. Con varios topics lanza **UN solo** `opencode run` — el `tunel-investigador` procesa todos los topics en una sola sesión. Esto evita saturar CPU con múltiples runtimes.
+- **Paciencia ~5 min:** el conocimiento queda disponible en ~5 minutos. Es **no bloqueante** — no esperar activamente; seguir con el flujo y leer cuando esté disponible.
+- **Regla de decisión (Refiner):** Refiner pregunta **SIEMPRE** si la investigación es **permanente** (→ túnel `econative_investigar`) o solo una **respuesta rápida** (→ `websearch` directo). El túnel es para conocimiento que quedará indexado en la biblioteca; una duda puntual no merece un spawn.
 - **Biblioteca:** `workspec/knowledge-library/` del repo — `index.json` (metadata barata) + `<domain>/<slug>.md` (formato estándar: `# título`, `## Descripción corta`, `## Resumen ejecutivo`, `#### secciones`, `## Fuentes`). NUNCA `~/biblioteca-conocimientos`.
 - **Guard anti-recursión:** el proceso lanzado lleva `OPENCODE_SUBAGENT=1`; `tunel-investigador` no relanza `opencode run`.
 - **Uso sugerido:** buscar primero (barato) → si no está, investigar (async) → leer cuando se necesite.

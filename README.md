@@ -115,9 +115,10 @@ Los 6 MCPs viajan en `opencode.json` y se activan al reiniciar OpenCode:
 El ecosistema trae un **túnel de investigación sellado**: agentes ocultos que investigan y dejan conocimiento indexado, sin interferir con el ciclo visible (Refiner/North/Executor/Auditor).
 
 - **3 tools visibles** (plugin `econative-conocimiento.ts`):
-  - `econative_investigar` — lanza una investigación **no bloqueante**: dispara `opencode run --agent tunel-investigador "misión"` en background desde la raíz del repo y devuelve apenas arrancó.
+  - `econative_investigar` — lanza una investigación **no bloqueante**: dispara `opencode run --agent tunel-investigador "misión"` en background desde la raíz del repo y devuelve apenas arrancó. Acepta `topic` (1) o `topics: ["a", "b"]` — con varios topics lanza **UN solo** `opencode run` (el `tunel-investigador` los procesa en una sola sesión, evitando saturar CPU). El conocimiento queda disponible en ~5 min; es no bloqueante, no esperar activamente.
   - `econative_conocimiento_buscar` — busca en el índice (barato, solo metadata/resúmenes).
   - `econative_conocimiento_leer` — lee el contenido completo de un entry.
+- **Regla de decisión:** Refiner pregunta **siempre** si la investigación es **permanente** (→ túnel `econative_investigar`) o solo una **respuesta rápida** (→ `websearch` directo). El túnel es para conocimiento que quedará indexado; una duda puntual no merece un spawn.
 - **Biblioteca:** `workspec/knowledge-library/` — `index.json` + entries en formato estándar (`template.md`: descripción corta, resumen ejecutivo, secciones, fuentes).
 - **Regla de sellado:** el túnel es sellado — nadie del ecosistema visible llama `task()` a los agentes ocultos (`tunel-investigador`, `tunel-investigador-web`, `tunel-validador`). La única puerta es la tool `econative_investigar`.
 
