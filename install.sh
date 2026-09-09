@@ -37,6 +37,12 @@ INSTALL_GRAPHIFY="${INSTALL_GRAPHIFY:-ask}"
 # en ~/.config/opencode/AGENTS.md. ask = pregunta si falta | yes = instala | no = saltea
 INSTALL_ENGRAM="${INSTALL_ENGRAM:-ask}"
 
+# Auto-limpieza: si el paquete fue clonado dentro del destino, al terminar se borra
+# a sí mismo (como si el usuario hiciera `rm -rf crisol-definitivo/`).
+# Conservan el paquete (no borra): keep, 1, true, yes, on | auto = borra solo si está dentro del destino
+# Cualquier otro valor también conserva (fail-safe).
+KEEP_PACKAGE="${KEEP_PACKAGE:-auto}"
+
 # --- Salida con colores (solo si stdout es una terminal) ---------------------
 if [ -t 1 ]; then
   C_BOLD=$'\033[1m'
@@ -69,6 +75,7 @@ Opciones:
   --dry-run        Solo muestra qué haría, sin copiar nada
   --yes            Instala uv, graphify y engram sin preguntar (si no están instalados)
   --no-tools       Saltea la instalación de herramientas (no pregunta nada)
+  --keep-package   Conserva el directorio del paquete (no lo borra al final)
   -h, --help       Muestra esta ayuda
 EOF
 }
@@ -101,6 +108,10 @@ parse_args() {
       --no-tools)
         INSTALL_GRAPHIFY="no"
         INSTALL_ENGRAM="no"
+        shift
+        ;;
+      --keep-package)
+        KEEP_PACKAGE="keep"
         shift
         ;;
       -h|--help)
@@ -562,6 +573,68 @@ setup_engram_mcp() {
   return 1
 }
 
+# --- Auto-limpieza del paquete ----------------------------------------------
+# Si el crisol se clonó dentro del destino (git clone + install.sh), al terminar
+# se borra a sí mismo para dejar el repo limpio (equivale al `rm -rf crisol-definitivo/`
+# que el usuario hacía a mano). NUNCA borra el destino. Guardas:
+#   - dry-run: no borra nunca (solo avisa)
+#   - KEEP_PACKAGE=keep: no borra (opt-out explícito, útil si clonaste en ubicación fija)
+#   - solo borra si SCRIPT_DIR está DENTRO de TARGET (clon en el destino)
+#   - verifica que SCRIPT_DIR es realmente el paquete (.opencode/ + install.sh + AGENTS.md)
+#   - nunca borra TARGET, ni /, ni $HOME
+cleanup_package() {
+  # Opt-out explícito: valores booleanos comunes conservan el paquete (no borra)
+  case "$KEEP_PACKAGE" in
+    keep|1|true|yes|on)
+      ok "Paquete conservado (KEEP_PACKAGE=$KEEP_PACKAGE): $SCRIPT_DIR"
+      return 0
+      ;;
+  esac
+
+  # Fail-safe: valor desconocido -> conservar (no borrar por accidente)
+  case "$KEEP_PACKAGE" in
+    auto|0|false|no|off|"") ;;
+    *)
+      warn "KEEP_PACKAGE desconocido ('$KEEP_PACKAGE'); se conserva el paquete por seguridad"
+      return 0
+      ;;
+  esac
+
+  if $DRY_RUN; then
+    dry "Borraría el paquete al final si pasara las guardas: $SCRIPT_DIR"
+    return 0
+  fi
+
+  # Guarda 1: nunca borrar si SCRIPT_DIR no está dentro de TARGET (ej. ubicación fija tipo ~/crisol-definitivo)
+  case "$SCRIPT_DIR" in
+    "$TARGET"/*) ;;
+    *)
+      ok "Paquete fuera del destino; se conserva: $SCRIPT_DIR"
+      return 0
+      ;;
+  esac
+
+  # Guarda 2: nunca borrar TARGET, /, ni $HOME
+  if [ "$SCRIPT_DIR" = "$TARGET" ] || [ "$SCRIPT_DIR" = "/" ] || [ "$SCRIPT_DIR" = "$HOME" ]; then
+    warn "No se borra el paquete por seguridad (ruta sensible): $SCRIPT_DIR"
+    return 0
+  fi
+
+  # Guarda 3: verificar que SCRIPT_DIR es realmente el paquete
+  if [ ! -d "$SCRIPT_DIR/.opencode" ] || [ ! -f "$SCRIPT_DIR/install.sh" ] || [ ! -f "$SCRIPT_DIR/AGENTS.md" ]; then
+    warn "No se borra $SCRIPT_DIR: no parece ser el paquete crisol-definitive (faltan .opencode/, install.sh o AGENTS.md)"
+    return 0
+  fi
+
+  info "Auto-limpieza: borrando el paquete clonado $SCRIPT_DIR (ya se instaló en $TARGET)..."
+  rm -rf "$SCRIPT_DIR" || true
+  if [ ! -d "$SCRIPT_DIR" ]; then
+    ok "Paquete eliminado: $SCRIPT_DIR"
+  else
+    warn "No se pudo borrar $SCRIPT_DIR (¿permisos?); eliminálo manualmente si querés."
+  fi
+}
+
 # --- Flujo principal ---------------------------------------------------------
 main() {
   parse_args "$@"
@@ -730,11 +803,22 @@ main() {
   else
     info "Instalación completada en: $TARGET"
     info "Se copió: .opencode/, workspec/ (solo faltantes), AGENTS.md (si faltaba), opencode.json (merge mcp). Herramientas: uv, graphify y engram (si se aceptaron)"
+    case "$KEEP_PACKAGE" in
+      keep|1|true|yes|on) ;;
+      auto|0|false|no|off|"")
+        info "Auto-limpieza: el paquete se eliminará al final (si fue clonado dentro del destino) — no hace falta rm -rf a mano"
+        ;;
+      *)
+        # valor desconocido: cleanup_package conservará; no prometemos borrado
+        ;;
+    esac
   fi
   echo
   info "Recordá reiniciar OpenCode para que las skills y plugins tomen efecto."
   info "Las skills toman efecto al reiniciar OpenCode; podés usar el script de reinicio cuando exista."
   echo
+
+  cleanup_package
 }
 
 main "$@"
