@@ -76,6 +76,7 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 - `context7` — documentación de librerías bajo demanda (remoto)
 - `chrome-devtools` — navegación, snapshots, screenshots, red y consola del navegador; portable vía `npx`
 - `playwright` — automatización E2E de navegador; portable vía `npx`
+- `markitdown` — conversión de archivos a markdown (PDFs, Office, HTML, audio, imágenes); portable vía `uvx markitdown-mcp`, requiere `uv`
 
 > **codegraph** se ejecuta vía `npx -y @colbymchenry/codegraph` (portable, el runtime lo levanta sin instalación global — mismo patrón que `sequential-thinking`). El paquete npm `codegraph` sin scope NO es el real; el real es `@colbymchenry/codegraph@1.5.0`. Usa un índice `.codegraph/` opcional por proyecto, creado con `codegraph init`; sin índice, el agente usa sus tools nativas (Read/Grep/Glob) — no bloquea nada.
 
@@ -103,7 +104,7 @@ MCPs configurados en `opencode.json`. Todos viajan en el repo y toman efecto al 
 
 Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutina. CodeGraph requiere un índice `.codegraph/` opcional y tiene fallback Read/Grep/Glob. Graphify no es MCP y los agentes no lo instalan por cuenta propia.
 
-> **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 6 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
+> **engram** NO viaja hardcodeado en el `opencode.json` del paquete (viaja limpio con los 7 MCPs de arriba). El `install.sh` lo agrega al `opencode.json` local del proyecto destino **solo si no lo tenés en tu config global de OpenCode** (`~/.config/opencode/opencode.json` o `.jsonc`) — así el MCP queda disponible sin duplicar y sin tocar la config global. El protocolo de memoria engram vive en `Agents-engram-memory/AGENTS.md` y se mergea al `~/.config/opencode/AGENTS.md` global.
 
 ### Links
 
@@ -124,8 +125,12 @@ Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutin
 | `Patcheador` | subagent | Vía rápida de Refiner para lo trivial (<10 líneas, 1 archivo). No pasa por North/Executor/Auditor. Loguea en `workspec/context/PATCH-RAPIDO.md` vía `econative_patch_rapido`. |
 | `tunel-investigador` | primary (oculto) | Orquestador del túnel. Lo lanza SOLO la tool `econative_investigar` vía `opencode run`. Investiga directo en la web y delega solo el control de calidad al `tunel-validador`; consolida e indexa el conocimiento. NO se invoca con task(). |
 | `tunel-validador` | subagent (oculto) | Control de calidad: valida estructura y fuentes, devuelve {score, verdict, feedback}. Solo lo llama tunel-investigador. |
+| `Ojo` | subagent | Descriptor de visión. Recibe el path de una imagen y describe lo que ve. Sin modelo de visión configurado todavía — ver nota abajo. |
+| `PDF` | subagent | Lector de documentos PDF. Recibe un path, extrae el contenido (markitdown / OCR / multimodal). |
 
 > **Agentes ocultos del túnel:** los dos agentes `tunel-*` son un subsistema sellado y **NO se invocan con `task()` desde el ecosistema visible**. La única puerta de entrada es la tool `econative_investigar`, que los lanza vía `opencode run --agent tunel-investigador` (ver sección «## Túnel de conocimiento»).
+
+> **Modelo de visión (Ojo / PDF):** estos dos agentes están diseñados para usar un modelo MULTIMODAL de visión + razonamiento (ej: `deepseek-v4-flash-vision-exp` o equivalente del proveedor). **Refiner debe pedirle al usuario** que, si tiene un modelo de visión de su proveedor, se lo comunique para configurarlo en Ojo y PDF. Hasta entonces operan con el modelo default y reportan sus limitaciones con honestidad.
 
 ### Filosofía
 
