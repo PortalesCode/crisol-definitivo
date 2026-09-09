@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import { dirname, join, resolve } from "path";
 import { spawn } from "child_process";
 import { tool } from "@opencode-ai/plugin";
 import type { Plugin } from "@opencode-ai/plugin";
@@ -86,6 +86,31 @@ function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+/**
+ * Resuelve la raíz del repo del ecosistema subiendo desde `start` hacia la raíz
+ * del sistema. La raíz es el directorio que contiene opencode.json Y
+ * .opencode/agents/tunel-investigador.md — UN NIVEL MÁS ARRIBA que .opencode/.
+ * El `opencode run --agent tunel-investigador` debe lanzarse parado ahí, no en
+ * el cwd del server de OpenCode ni dentro de .opencode/. Devuelve null si no
+ * encuentra ninguna raíz válida.
+ */
+function resolveRepoRoot(start: string): string | null {
+  // Sube desde `start` hasta la raíz del sistema buscando un directorio que
+  // sea la raíz del repo del ecosistema: tiene opencode.json y .opencode/agents/
+  // con tunel-investigador.md. El `opencode run --agent tunel-investigador`
+  // debe lanzarse parado en la raíz del repo (UN NIVEL MÁS ARRIBA que .opencode/),
+  // no en el cwd del server ni dentro de .opencode/.
+  let dir = resolve(start || process.cwd());
+  for (;;) {
+    const hasOpenCodeJson = existsSync(join(dir, "opencode.json"));
+    const hasTunelAgent = existsSync(join(dir, ".opencode", "agents", "tunel-investigador.md"));
+    if (hasOpenCodeJson && hasTunelAgent) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
 export default (async () => {
   return {
     tool: {
@@ -109,7 +134,16 @@ export default (async () => {
         },
         async execute(args, context) {
           try {
-            const root = context.directory;
+            const startDir = (context.directory as string) || process.cwd();
+            const root = resolveRepoRoot(startDir);
+            if (!root) {
+              return {
+                output: JSON.stringify({
+                  ok: false,
+                  error: `No se encontró la raíz del repo del ecosistema (opencode.json + .opencode/agents/tunel-investigador.md) desde ${startDir}`,
+                }),
+              };
+            }
 
             const topicRaw = (args.topic as string | undefined)?.trim() || "";
             const topicsRaw = Array.isArray(args.topics) ? args.topics : [];
@@ -229,7 +263,16 @@ export default (async () => {
         },
         async execute(args, context) {
           try {
-            const root = context.directory;
+            const startDir = (context.directory as string) || process.cwd();
+            const root = resolveRepoRoot(startDir);
+            if (!root) {
+              return {
+                output: JSON.stringify({
+                  ok: false,
+                  error: `No se encontró la raíz del repo del ecosistema (opencode.json + .opencode/agents/tunel-investigador.md) desde ${startDir}`,
+                }),
+              };
+            }
 
             const query = ((args.query as string | undefined)?.trim() || "").toLowerCase();
             const domainFilter = (args.domain as string | undefined)?.trim() || "";
@@ -290,7 +333,16 @@ export default (async () => {
         },
         async execute(args, context) {
           try {
-            const root = context.directory;
+            const startDir = (context.directory as string) || process.cwd();
+            const root = resolveRepoRoot(startDir);
+            if (!root) {
+              return {
+                output: JSON.stringify({
+                  ok: false,
+                  error: `No se encontró la raíz del repo del ecosistema (opencode.json + .opencode/agents/tunel-investigador.md) desde ${startDir}`,
+                }),
+              };
+            }
 
             const keyInput = (args.key as string | undefined)?.trim();
             if (!keyInput) {
