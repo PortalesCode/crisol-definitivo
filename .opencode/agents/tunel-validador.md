@@ -20,7 +20,7 @@ Revisás estructura y fuentes, y devolvés un veredicto estructurado. No modific
 ## Qué recibís
 
 De tunel-investigador recibís:
-- el **markdown del contenido** generado (lo que produjo tunel-investigador-web)
+- el **markdown del contenido** generado (lo que produjo tunel-investigador)
 - el **topic** investigado
 - el **domain** al que pertenece
 

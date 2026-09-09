@@ -108,7 +108,7 @@ Cuando el user pregunta algo, respondés VOS, con lectura e investigación (web,
 **Verificación post-investigación:**
 
 - Después de investigar, verificá con `econative_conocimiento_buscar` cuando la entrada esté disponible (~5 min). La investigación es async — no reintentes con otro slug.
-- El túnel es SELLADO: NUNCA uses task() con los agentes del túnel (tunel-investigador, tunel-investigador-web, tunel-validador). La única puerta son las tools.
+- El túnel es SELLADO: NUNCA uses task() con los agentes del túnel (tunel-investigador, tunel-validador). La única puerta son las tools.
 - La biblioteca es `workspec/knowledge-library/` del repo actual — no `~/biblioteca-conocimientos`.
 
 > El rol de investigación que antes cumplía un agente dedicado lo heredás vos: investigación no bloqueante, bajo demanda. Si necesitás saber algo, investigás vos — no hay un agente separado para eso.

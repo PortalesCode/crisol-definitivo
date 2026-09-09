@@ -122,11 +122,10 @@ Context7 es documentación bajo demanda. Sequential Thinking no se usa por rutin
 | `Executor` | subagent | La mano de North. Ejecuta. |
 | `Auditor` | subagent | Verifica que lo ejecutado esté perfecto. |
 | `Patcheador` | subagent | Vía rápida de Refiner para lo trivial (<10 líneas, 1 archivo). No pasa por North/Executor/Auditor. Loguea en `workspec/context/PATCH-RAPIDO.md` vía `econative_patch_rapido`. |
-| `tunel-investigador` | primary (oculto) | Orquestador del túnel. Lo lanza SOLO la tool `econative_investigar` vía `opencode run`. Delega a los subagentes del túnel, consolida e indexa el conocimiento. NO se invoca con task(). |
-| `tunel-investigador-web` | subagent (oculto) | Investiga crudo en la web (websearch/webfetch/playwright/chrome-devtools). Solo lo llama tunel-investigador. |
+| `tunel-investigador` | primary (oculto) | Orquestador del túnel. Lo lanza SOLO la tool `econative_investigar` vía `opencode run`. Investiga directo en la web y delega solo el control de calidad al `tunel-validador`; consolida e indexa el conocimiento. NO se invoca con task(). |
 | `tunel-validador` | subagent (oculto) | Control de calidad: valida estructura y fuentes, devuelve {score, verdict, feedback}. Solo lo llama tunel-investigador. |
 
-> **Agentes ocultos del túnel:** los tres agentes `tunel-*` son un subsistema sellado y **NO se invocan con `task()` desde el ecosistema visible**. La única puerta de entrada es la tool `econative_investigar`, que los lanza vía `opencode run --agent tunel-investigador` (ver sección «## Túnel de conocimiento»).
+> **Agentes ocultos del túnel:** los dos agentes `tunel-*` son un subsistema sellado y **NO se invocan con `task()` desde el ecosistema visible**. La única puerta de entrada es la tool `econative_investigar`, que los lanza vía `opencode run --agent tunel-investigador` (ver sección «## Túnel de conocimiento»).
 
 ### Filosofía
 
@@ -142,7 +141,7 @@ Preferencias = configuración del usuario (nombre, idioma)
 
 ## Túnel de conocimiento
 
-- **Qué es:** túnel sellado de investigación OpenCode puro. La tool `econative_investigar` lanza `opencode run --agent tunel-investigador` en background (**NO BLOQUEANTE**) desde la **RAÍZ del repo** (donde vive `.opencode/`). El `tunel-investigador` orquesta los subagentes del túnel (web + validador), consolida, escribe el `.md` e indexa.
+- **Qué es:** túnel sellado de investigación OpenCode puro. La tool `econative_investigar` lanza `opencode run --agent tunel-investigador` en background (**NO BLOQUEANTE**) desde la **RAÍZ del repo** (donde vive `.opencode/`). El `tunel-investigador` investiga directo en la web y delega solo el control de calidad al `tunel-validador`; consolida, escribe el `.md` e indexa.
 - **Regla de oro:** NUNCA llamar `task()` a los agentes del túnel desde el ecosistema visible. La única puerta son las tools.
 - **Tools del ecosistema visible:**
 

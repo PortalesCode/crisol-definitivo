@@ -120,7 +120,7 @@ El ecosistema trae un **túnel de investigación sellado**: agentes ocultos que 
   - `econative_conocimiento_leer` — lee el contenido completo de un entry.
 - **Regla de decisión:** Refiner pregunta **siempre** si la investigación es **permanente** (→ túnel `econative_investigar`) o solo una **respuesta rápida** (→ `websearch` directo). El túnel es para conocimiento que quedará indexado; una duda puntual no merece un spawn.
 - **Biblioteca:** `workspec/knowledge-library/` — `index.json` + entries en formato estándar (`template.md`: descripción corta, resumen ejecutivo, secciones, fuentes).
-- **Regla de sellado:** el túnel es sellado — nadie del ecosistema visible llama `task()` a los agentes ocultos (`tunel-investigador`, `tunel-investigador-web`, `tunel-validador`). La única puerta es la tool `econative_investigar`.
+- **Regla de sellado:** el túnel es sellado — nadie del ecosistema visible llama `task()` a los agentes ocultos (`tunel-investigador`, `tunel-validador`). La única puerta es la tool `econative_investigar`.
 
 ## Plugins incluidos
 
